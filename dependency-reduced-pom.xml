@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.nonxedy.nonchat</groupId>
   <artifactId>nonchat</artifactId>
-  <version>1.5.9</version>
+  <version>1.6.0</version>
   <build>
     <finalName>nonchat-${project.version}${dev.build.suffix}</finalName>
     <pluginManagement>
@@ -72,10 +72,6 @@
                   <pattern>org.apache.commons.lang3</pattern>
                   <shadedPattern>com.nonxedy.nonchat.libs.commonslang3</shadedPattern>
                 </relocation>
-                <relocation>
-                  <pattern>org.bstats</pattern>
-                  <shadedPattern>com.nonxedy.nonchat.libs.bstats</shadedPattern>
-                </relocation>
               </relocations>
             </configuration>
           </execution>
@@ -116,12 +112,17 @@
       <id>Scarsz-Nexus</id>
       <url>https://nexus.scarsz.me/content/groups/public/</url>
     </repository>
+    <repository>
+      <id>faststats-releases</id>
+      <name>FastStats</name>
+      <url>https://repo.faststats.dev/releases</url>
+    </repository>
   </repositories>
   <dependencies>
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.21.11-R0.1-SNAPSHOT</version>
+      <version>[26.1.2.build,)</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -132,13 +133,7 @@
     </dependency>
     <dependency>
       <groupId>net.kyori</groupId>
-      <artifactId>adventure-text-minimessage</artifactId>
-      <version>4.26.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.kyori</groupId>
-      <artifactId>adventure-text-serializer-legacy</artifactId>
+      <artifactId>adventure-api</artifactId>
       <version>4.26.1</version>
       <scope>provided</scope>
     </dependency>
@@ -168,7 +163,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>
