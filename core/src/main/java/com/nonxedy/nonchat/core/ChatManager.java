@@ -724,15 +724,16 @@ public class ChatManager {
      * @param cooldown          Cooldown between messages in seconds
      * @param minLength         Minimum message length
      * @param maxLength         Maximum message length, or -1 for unlimited
+     * @param switchMessage     Message to be sent when switching channel
      * @return The created channel, or null if the ID already exists
      */
     public Channel createChannel(String channelId, String displayName, String format,
             Character character, String sendPermission, String receivePermission,
-            int radius, int cooldown, int minLength, int maxLength) {
+            int radius, int cooldown, int minLength, int maxLength, String switchMessage) {
         String prefix = character != null ? String.valueOf(character) : "";
         return channelManager.createChannel(channelId, displayName, format, prefix,
                 sendPermission, receivePermission, radius,
-                cooldown, minLength, maxLength);
+                cooldown, minLength, maxLength, switchMessage);
     }
 
     /**
@@ -760,16 +761,18 @@ public class ChatManager {
      *                          existing)
      * @param minLength         Minimum message length (null to keep existing)
      * @param maxLength         Maximum message length (null to keep existing)
+     * @param switchMessage     Message to be sent when switching channel (null to keep
+     *                          existing)
      * @return True if the channel was updated, false otherwise
      */
     public boolean updateChannel(String channelId, String displayName, String format,
             Character character, String sendPermission, String receivePermission,
             Integer radius, Boolean enabled, Integer cooldown,
-            Integer minLength, Integer maxLength) {
+            Integer minLength, Integer maxLength, String switchMessage) {
         String prefix = character != null ? String.valueOf(character) : null;
         return channelManager.updateChannel(channelId, displayName, format, prefix,
                 sendPermission, receivePermission, radius, enabled,
-                cooldown, minLength, maxLength);
+                cooldown, minLength, maxLength, switchMessage);
     }
 
     /**

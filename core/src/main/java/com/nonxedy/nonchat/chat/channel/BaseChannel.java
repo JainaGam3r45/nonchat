@@ -40,7 +40,7 @@ public class BaseChannel implements Channel {
     private final int maxLength;
     private final HoverTextUtil hoverTextUtil;
     private boolean enabled;
-
+    private final String switchMessage;
     /**
      * Creates a new BaseChannel with all properties.
      */
@@ -48,8 +48,8 @@ public class BaseChannel implements Channel {
                        String sendPermission, String receivePermission, int radius,
                        boolean enabled, HoverTextUtil hoverTextUtil, int cooldown,
                        int minLength, int maxLength) {
-        this(id, displayName, format, prefix, sendPermission, receivePermission, radius, 
-             "", enabled, hoverTextUtil, cooldown, minLength, maxLength);
+        this(id, displayName, format, prefix, sendPermission, receivePermission, radius,
+                "", enabled, hoverTextUtil, cooldown, minLength, maxLength, "");
     }
     
     /**
@@ -58,7 +58,7 @@ public class BaseChannel implements Channel {
     public BaseChannel(String id, String displayName, String format, String prefix,
                        String sendPermission, String receivePermission, int radius,
                        String world, boolean enabled, HoverTextUtil hoverTextUtil, int cooldown,
-                       int minLength, int maxLength) {
+                       int minLength, int maxLength, String switchMessage) {
         this.id = id;
         this.displayName = displayName;
         this.format = format;
@@ -88,6 +88,8 @@ public class BaseChannel implements Channel {
         this.cooldown = cooldown;
         this.minLength = minLength;
         this.maxLength = maxLength;
+        this.switchMessage = switchMessage != null ? switchMessage : "";
+
     }
 
     @Override
@@ -168,6 +170,16 @@ public class BaseChannel implements Channel {
     @Override
     public int getMaxLength() {
         return maxLength;
+    }
+
+    @Override
+    public String getSwitchMessage() {
+        return switchMessage;
+    }
+
+    @Override
+    public boolean hasSwitchMessage() {
+        return switchMessage != null && !switchMessage.isEmpty();
     }
 
     @Override

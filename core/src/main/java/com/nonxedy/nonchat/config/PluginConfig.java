@@ -251,6 +251,7 @@ public class PluginConfig {
         config.set("channels.global.cooldown", 0);
         config.set("channels.global.min-length", 0);
         config.set("channels.global.max-length", -1);
+        config.set("channels.global.switch-message", "");
 
         // Configure local chat channel
         config.set("channels.local.enabled", true);
@@ -263,6 +264,7 @@ public class PluginConfig {
         config.set("channels.local.cooldown", 0);
         config.set("channels.local.min-length", 0);
         config.set("channels.local.max-length", -1);
+        config.set("channels.local.switch-message", "");
         
         // Configure staff chat channel
         config.set("channels.staff.enabled", true);
@@ -275,6 +277,7 @@ public class PluginConfig {
         config.set("channels.staff.cooldown", 0);
         config.set("channels.staff.min-length", 0);
         config.set("channels.staff.max-length", -1);
+        config.set("channels.staff.switch-message", "");
     }
 
     /**
@@ -964,6 +967,7 @@ public class PluginConfig {
                     int cooldown = channelSection.getInt("cooldown", 0);
                     int minLength = channelSection.getInt("min-length", 0);
                     int maxLength = channelSection.getInt("max-length", -1);
+                    String switchMessage = channelSection.getString("switch-message");
                     
                     channels.put(key, new ChatTypeUtil(
                         enabled,
@@ -975,7 +979,8 @@ public class PluginConfig {
                         receivePermission,
                         cooldown,
                         minLength,
-                        maxLength
+                        maxLength,
+                        switchMessage
                     ));
                 }
             }

@@ -198,6 +198,8 @@ channels:
     min-length: 0
     # Maximum message length (-1 to disable limit).
     max-length: -1
+    # Message sent to the player when switching to this channel ("" for no message).
+    switch-message: ""
   
   local:
     enabled: true
@@ -210,6 +212,7 @@ channels:
     cooldown: 0
     min-length: 0
     max-length: -1
+    switch-message: ""
   
   staff:
     enabled: true
@@ -222,6 +225,7 @@ channels:
     cooldown: 0
     min-length: 0
     max-length: -1
+    switch-message: ""
   
 
 # ==================================================

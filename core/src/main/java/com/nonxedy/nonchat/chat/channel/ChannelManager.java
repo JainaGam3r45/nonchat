@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -113,11 +114,12 @@ public class ChannelManager {
             int cooldown = channelSection.getInt("cooldown", 0);
             int minLength = channelSection.getInt("min-length", 0);
             int maxLength = channelSection.getInt("max-length", 256);
+            String switchMessage = channelSection.getString("switch-message", "");
 
             // Create and register channel
             Channel channel = new BaseChannel(
                 channelId, displayName, format, prefix, sendPermission, receivePermission,
-                radius, world, enabled, hoverTextUtil, cooldown, minLength, maxLength
+                radius, world, enabled, hoverTextUtil, cooldown, minLength, maxLength, switchMessage
             );
             
             if (config.isDebug()) {
@@ -195,7 +197,7 @@ public class ChannelManager {
      */
     public Channel createChannel(String channelId, String displayName, String format,
                                 String prefix, String sendPermission, String receivePermission,
-                                int radius, int cooldown, int minLength, int maxLength) {
+                                int radius, int cooldown, int minLength, int maxLength, String switchMessage) {
         // Check if channel already exists
         if (channels.containsKey(channelId)) {
             return null;
@@ -242,7 +244,8 @@ public class ChannelManager {
             config.getHoverTextUtil(),
             cooldown,
             minLength,
-            maxLength
+            maxLength,
+            switchMessage
         );
         
         // Add to channels map
@@ -273,7 +276,7 @@ public class ChannelManager {
     public boolean updateChannel(String channelId, String displayName, String format,
                                 String prefix, String sendPermission, String receivePermission,
                                 Integer radius, Boolean enabled, Integer cooldown, 
-                                Integer minLength, Integer maxLength) {
+                                Integer minLength, Integer maxLength, String switchMessage) {
         // Get existing channel
         Channel existingChannel = getChannel(channelId);
         if (existingChannel == null) {
@@ -315,7 +318,8 @@ public class ChannelManager {
             config.getHoverTextUtil(),
             cooldown != null ? cooldown : existingChannel.getCooldown(),
             minLength != null ? minLength : existingChannel.getMinLength(),
-            maxLength != null ? maxLength : existingChannel.getMaxLength()
+            maxLength != null ? maxLength : existingChannel.getMaxLength(),
+            switchMessage != null ? switchMessage : existingChannel.getSwitchMessage()
         );
         
         // Replace in channels map
@@ -633,12 +637,18 @@ public class ChannelManager {
      */
     public boolean setPlayerChannel(Player player, String channelId) {
         Channel channel = getChannel(channelId);
-        
+
         if (channel != null && channel.isEnabled()) {
             playerChannels.put(player, channel);
+
+            // Send switch message if configured
+            if (channel.hasSwitchMessage()) {
+                player.sendMessage(ColorUtil.parseConfigComponent(channel.getSwitchMessage()));
+            }
+
             return true;
         }
-        
+
         return false;
     }
     
