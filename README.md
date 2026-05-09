@@ -78,7 +78,7 @@ Use `[item]` in your messages to showcase the item you're currently holding:
 
 ## 📚 Documentation
 
-Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup instructions and configuration guides.
+Visit our [Wiki](https://github.com/utophii/nonchat/wiki) for detailed setup instructions and configuration guides.
 
 ## 🌟 Why nonchat?
 
@@ -108,8 +108,8 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 ## 🔧 Support
 
 - [Discord Community](https://discord.gg/NAWsxe3J3R)
-- [Issue Tracker](https://github.com/nonxedy/nonchat/issues)
-- [Wiki Documentation](https://github.com/nonxedy/nonchat/wiki)
+- [Issue Tracker](https://github.com/utophii/nonchat/issues)
+- [Wiki Documentation](https://github.com/utophii/nonchat/wiki)
 
 ## 💝 Support the Development
 
@@ -134,5 +134,5 @@ nonchat is licensed under MIT License.
 ---
 
 <div align="center">
-  Made with ❤️ by nonxedy
+  Made with ❤️ by utophii
 </div>
