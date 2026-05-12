@@ -23,7 +23,6 @@ import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.listener.DamageTrackingListener;
 import com.nonxedy.nonchat.listener.DeathCoordinates;
 import com.nonxedy.nonchat.listener.DeathListener;
-import com.nonxedy.nonchat.listener.DiscordSRVListener;
 import com.nonxedy.nonchat.listener.JoinQuitListener;
 import com.nonxedy.nonchat.listener.MentionTabCompleteListener;
 import com.nonxedy.nonchat.listener.PlayerCleanupListener;
@@ -56,7 +55,6 @@ public class Nonchat extends JavaPlugin {
     private SpyCommand spyCommand;
     private Debugger debugger;
     private IgnoreCommand ignoreCommand;
-    private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private InteractivePlaceholderManager placeholderManager;
     private IndirectDeathTracker indirectDeathTracker;
@@ -305,9 +303,7 @@ public class Nonchat extends JavaPlugin {
                 }
             });
 
-            // Initialize DiscordSRV listener
             if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null) {
-                this.discordSRVListener = new DiscordSRVListener(this);
                 this.discordSRVIntegration = new DiscordSRVIntegration(this);
                 getLogger().info("DiscordSRV integration enabled");
             } else {
@@ -353,10 +349,6 @@ public class Nonchat extends JavaPlugin {
 
             if (commandService != null) {
                 commandService.unregisterAll();
-            }
-
-            if (discordSRVListener != null) {
-                discordSRVListener.shutdown();
             }
 
             if (discordSRVIntegration != null) {

@@ -189,42 +189,21 @@ public class ChatManager {
         Player player = context.player;
         String message = context.messageContent;
 
-        // Determine which channel to use based on message prefix or player's active
-        // channel, checking player permissions first
-        Channel channel = channelManager.getChannelForMessageWithPermission(message, player);
-
-        // If no channel was found by prefix with permission check, try to find a channel 
-        // without prefix that the player has permission for, or use the player's active channel
-        if (channel == null) {
-            // First, try to find a channel without prefix that player has permission for
-            Channel noPrefixChannel = channelManager.getChannelWithoutPrefixForPlayer(player);
-            if (noPrefixChannel != null) {
-                channel = noPrefixChannel;
-                channelManager.setPlayerChannel(player, channel.getId());
-            } else {
-                // Fall back to player's active channel (will be validated later)
-                channel = channelManager.getPlayerChannel(player);
-                if (channel == null) {
-                    return false; // Silently cancel if no channel available
-                }
-            }
+        ChannelManager.ResolvedChannelMessage resolvedMessage = channelManager.resolveChannelMessage(message, player);
+        if (resolvedMessage == null) {
+            return false;
         }
 
-        String finalMessage;
-        // If a channel was found by prefix, update player's active channel and remove
-        // the prefix. This is needed for DiscordSRV to see the correct channel.
-        if (channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
-            channelManager.setPlayerChannel(player, channel.getId());
-            finalMessage = message.substring(channel.getPrefix().length());
-            if (finalMessage.trim().isEmpty()) {
-                return false; // Silently cancel empty messages after removing prefix
-            }
-        } else {
-            finalMessage = message;
+        if (resolvedMessage.updatePlayerChannel()) {
+            channelManager.setPlayerChannel(player, resolvedMessage.channel().getId());
         }
 
-        context.channel = channel;
-        context.finalMessage = finalMessage;
+        if (resolvedMessage.message().trim().isEmpty()) {
+            return false;
+        }
+
+        context.channel = resolvedMessage.channel();
+        context.finalMessage = resolvedMessage.message();
         return true;
     }
 

@@ -24,6 +24,8 @@ import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
  * Manages all chat channels in the nonchat plugin.
  */
 public class ChannelManager {
+    public record ResolvedChannelMessage(Channel channel, String message, boolean updatePlayerChannel) {}
+
     private final Map<String, Channel> channels = new ConcurrentHashMap<>();
     private final Map<Player, Channel> playerChannels = new ConcurrentHashMap<>();
     private final Map<Player, Long> lastMessageTimes = new ConcurrentHashMap<>();
@@ -583,6 +585,44 @@ public class ChannelManager {
             .filter(Channel::hasPrefix)
             .filter(channel -> channel.getPrefix().equals(prefix))
             .findFirst();
+    }
+
+    /**
+     * Resolves which channel should handle a player's message and returns the
+     * message content with any matched channel prefix removed.
+     *
+     * @param message The raw message
+     * @param player The player sending the message
+     * @return The resolved channel message, or null if no channel could be resolved
+     */
+    @Nullable
+    public ResolvedChannelMessage resolveChannelMessage(String message, Player player) {
+        if (message == null || message.isEmpty() || player == null) {
+            return null;
+        }
+
+        Channel channel = getChannelForMessageWithPermission(message, player);
+        boolean updatePlayerChannel = false;
+        String resolvedMessage = message;
+
+        if (channel != null) {
+            updatePlayerChannel = true;
+            resolvedMessage = message.substring(channel.getPrefix().length());
+        } else {
+            Channel noPrefixChannel = getChannelWithoutPrefixForPlayer(player);
+            if (noPrefixChannel != null) {
+                channel = noPrefixChannel;
+                updatePlayerChannel = true;
+            } else {
+                channel = getPlayerChannel(player);
+            }
+        }
+
+        if (channel == null) {
+            return null;
+        }
+
+        return new ResolvedChannelMessage(channel, resolvedMessage, updatePlayerChannel);
     }
     
     /**
