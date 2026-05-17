@@ -1,10 +1,14 @@
 package com.nonxedy.nonchat.util.core.updates;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.Bukkit;
@@ -76,18 +80,23 @@ public final class UpdateChecker implements Listener {
         // Run the update check asynchronously
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                // TODO: Migrate to HttpClient (Java 11+) for async support and modern API usage.
-                // Connect to Modrinth API (using URI.toURL() to avoid deprecated URL constructor since Java 20)
-                HttpURLConnection connection = (HttpURLConnection) new URI(MODRINTH_API).toURL().openConnection();
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
-                
                 // Log connection attempt
                 plugin.logResponse("Checking for updates from: " + MODRINTH_API);
                 
+                // Build HTTP request to Modrinth API
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI(MODRINTH_API))
+                    .timeout(Duration.ofSeconds(5))
+                    .GET()
+                    .build();
+                
+                // Send request and get response
+                HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+                
                 // Parse JSON response to get latest version info
                 JsonObject latestVersion;
-                try (InputStreamReader reader = new InputStreamReader(connection.getInputStream())) {
+                try (InputStreamReader reader = new InputStreamReader(response.body())) {
                     latestVersion = new JsonParser()
                         .parse(reader)
                         .getAsJsonArray()
@@ -108,7 +117,7 @@ public final class UpdateChecker implements Listener {
                 plugin.logResponse("Update available: " + this.updateAvailable);
                 
                 future.complete(this.updateAvailable);
-            } catch (JsonIOException | JsonSyntaxException | IOException | URISyntaxException e) {
+            } catch (JsonIOException | JsonSyntaxException | IOException | InterruptedException | URISyntaxException e) {
                 plugin.logError("Failed to check for updates: " + e.getMessage());
                 future.complete(false);
             }
