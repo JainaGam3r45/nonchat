@@ -13,7 +13,7 @@ import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.items.display.ItemDisplayUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.ComponentBuilder;
 
 /**
  * Utility for detecting and replacing item placeholders in chat messages
@@ -48,7 +48,7 @@ public class ItemDetector {
         }
         
         // Initialize the component with an empty text
-        TextComponent.Builder builder = Component.text().content("");
+        ComponentBuilder<?, ?> builder = Component.text().content("");
         
         // Get matcher for the item pattern
         Matcher matcher = ITEM_PATTERN.matcher(text);
