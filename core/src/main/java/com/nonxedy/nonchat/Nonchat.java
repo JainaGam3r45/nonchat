@@ -36,6 +36,7 @@ import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import dev.faststats.bukkit.BukkitMetrics;
 import dev.faststats.core.ErrorTracker;
@@ -96,7 +97,7 @@ public class Nonchat extends JavaPlugin {
             setupIntegrations();
             metrics.ready();
             
-            Bukkit.getConsoleSender().sendMessage("§d[nonchat] §aplugin enabled");
+            MessageUtil.send(Bukkit.getConsoleSender(), "§d[nonchat] §aplugin enabled");
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to enable plugin: {0}", e.getMessage());
              throw new RuntimeException("Failed to enable plugin", e);
@@ -366,7 +367,7 @@ public class Nonchat extends JavaPlugin {
             // Cancel all remaining Bukkit tasks for this plugin
             Bukkit.getScheduler().cancelTasks(this);
 
-            Bukkit.getConsoleSender().sendMessage("§d[nonchat] §cplugin disabled");
+            MessageUtil.send(Bukkit.getConsoleSender(), "§d[nonchat] §cplugin disabled");
             
             metrics.shutdown();
 

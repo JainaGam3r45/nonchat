@@ -24,6 +24,7 @@ import com.google.gson.JsonSyntaxException;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -154,14 +155,14 @@ public final class UpdateChecker implements Listener {
      */
     private void sendUpdateNotification(Player player) {
         try {
-            player.sendMessage(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffff A new version is available: &#FFAFFB" + latestVersion));
+            MessageUtil.send(player, ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffff A new version is available: &#FFAFFB" + latestVersion));
         
             Component downloadMessage = Component.text()
                 .append(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffffDownload: "))
                 .append(LinkDetector.makeLinksClickable(downloadUrl))
                 .build();
         
-            player.sendMessage(downloadMessage);
+            MessageUtil.send(player, downloadMessage);
             
             plugin.logResponse("Sent update notification to admin: " + player.getName());
         } catch (Exception e) {

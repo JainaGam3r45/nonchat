@@ -14,6 +14,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.chat.formatting.PrivateMessageUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -39,12 +40,12 @@ public class MessageManager {
 
     public void sendPrivateMessage(Player sender, Player receiver, String message) {
         if (ignoreCommand != null && ignoreCommand.isIgnoring(receiver, sender)) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
             return;
         }
 
         if (ignoreCommand != null && ignoreCommand.isIgnoring(sender, receiver)) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
+            MessageUtil.send(sender, ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
                     .replace("{player}", receiver.getName())));
             return;
         }
@@ -53,7 +54,7 @@ public class MessageManager {
         if (receiver == null || !receiver.isOnline()) {
             // Only show notification if enabled in config
             if (config.isUndeliveredMessageNotificationEnabled()) {
-                sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
+                MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
             }
             return;
         }
@@ -67,8 +68,8 @@ public class MessageManager {
         Component senderMessage = PrivateMessageUtil.createSenderMessage(config, sender, receiver, processedMessage);
         Component receiverMessage = PrivateMessageUtil.createReceiverMessage(config, sender, receiver, processedMessage);
 
-        sender.sendMessage(senderMessage);
-        receiver.sendMessage(receiverMessage);
+        MessageUtil.send(sender, senderMessage);
+        MessageUtil.send(receiver, receiverMessage);
 
         spyCommand.onPrivateMessage(sender, receiver, Component.text(processedMessage));
     }
@@ -77,13 +78,13 @@ public class MessageManager {
         UUID lastSenderUUID = getLastMessageSender().get(sender.getUniqueId());
         if (lastSenderUUID == null) {
             plugin.logError("No last message sender found for player " + sender.getName());
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-reply-target")));
+            MessageUtil.send(sender, ColorUtil.parseComponent(messages.getString("no-reply-target")));
             return;
         }
 
         Player receiver = Bukkit.getPlayer(lastSenderUUID);
         if (receiver == null || !receiver.isOnline()) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-offline")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-offline")));
             return;
         }
 

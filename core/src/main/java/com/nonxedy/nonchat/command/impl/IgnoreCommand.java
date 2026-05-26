@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 public class IgnoreCommand implements CommandExecutor, TabCompleter {
 
@@ -51,7 +52,7 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
 
         // Check if sender is a player
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-only")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-only")));
             plugin.logError("Ignore command can only be used by players");
             return true;
         }
@@ -61,14 +62,14 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
 
         // Check permissions for using the command
         if (!player.hasPermission("nonchat.ignore")) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             plugin.logError("No permission for ignore command");
             return true;
         }
 
         // Validate command usage
         if (args.length != 1) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-usage-ignore")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("invalid-usage-ignore")));
             plugin.logError("Invalid arguments for ignore command");
             return true;
         }
@@ -76,14 +77,14 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
         // Find target player
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-not-found")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-not-found")));
             plugin.logError("Target player not found");
             return true;
         }
 
         // Prevent ignoring yourself
         if (target.equals(player)) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("cannot-ignore-self")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("cannot-ignore-self")));
             plugin.logError("Player tried to ignore themselves");
             return true;
         }
@@ -96,13 +97,13 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
         if (ignored.contains(targetUUID)) {
             // Remove from ignore list
             ignored.remove(targetUUID);
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("unignored-player")
+            MessageUtil.send(sender, ColorUtil.parseComponent(messages.getString("unignored-player")
                     .replace("{player}", target.getName())));
             plugin.logResponse("Player unignored: " + target.getName());
         } else {
             // Add to ignore list
             ignored.add(targetUUID);
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-player")
+            MessageUtil.send(sender, ColorUtil.parseComponent(messages.getString("ignored-player")
                     .replace("{player}", target.getName())));
             plugin.logResponse("Player ignored: " + target.getName());
         }

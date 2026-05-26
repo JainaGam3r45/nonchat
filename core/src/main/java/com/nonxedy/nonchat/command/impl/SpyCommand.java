@@ -16,6 +16,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -59,7 +60,7 @@ public class SpyCommand implements CommandExecutor, TabCompleter {
 
         // Check if sender is a player
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-only")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-only")));
             return true;
         }
 
@@ -68,7 +69,7 @@ public class SpyCommand implements CommandExecutor, TabCompleter {
 
         // Check if player has permission to use spy command
         if (!player.hasPermission("nonchat.spy")) {
-            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             plugin.logError("Player " + player.getName() + " tried to use spy command without permission");
             return true;
         }
@@ -87,12 +88,12 @@ public class SpyCommand implements CommandExecutor, TabCompleter {
             // If player is already spying, disable it
             if (spyPlayers.contains(player)) {
                 spyPlayers.remove(player);
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("spy-mode-disabled")));
+                MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("spy-mode-disabled")));
                 plugin.logResponse("Spy mode disabled for " + player.getName());
             } else {
                 // If player is not spying, enable it
                 spyPlayers.add(player);
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("spy-mode-enabled")));
+                MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("spy-mode-enabled")));
                 plugin.logResponse("Spy mode enabled for " + player.getName());
             }
         } catch (Exception e) {
@@ -119,7 +120,7 @@ public class SpyCommand implements CommandExecutor, TabCompleter {
         // Send formatted message to all spies except sender and target
         for (Player spy : spyPlayers) {
             if (spy != sender && spy != target && spy.isOnline()) {
-                spy.sendMessage(ColorUtil.parseComponent(spyFormat));
+                MessageUtil.send(spy, ColorUtil.parseComponent(spyFormat));
                 plugin.logResponse("Spy " + spy.getName() + " received message: " + spyFormat);
             }
         }
