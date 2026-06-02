@@ -15,7 +15,11 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
  */
 public final class MessageUtil {
 
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.builder()
+        .character(LegacyComponentSerializer.SECTION_CHAR)
+        .hexColors()
+        .useUnusualXRepeatedCharacterHexFormat()
+        .build();
 
     private MessageUtil() {
     }

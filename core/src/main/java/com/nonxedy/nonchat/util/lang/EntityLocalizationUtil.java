@@ -5,6 +5,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import com.nonxedy.nonchat.config.DeathConfig;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -42,9 +43,9 @@ public class EntityLocalizationUtil {
         
         // Check for entity's custom name (name tag)
         if (deathConfig != null && deathConfig.useCustomEntityNames()) {
-            Component nameTag = entity.customName();
-            if (nameTag != null) {
-                customNameTag = nameTag;
+            String nameTag = entity.getCustomName();
+            if (nameTag != null && !nameTag.isEmpty()) {
+                customNameTag = ColorUtil.parseComponent(nameTag);
             }
         }
         

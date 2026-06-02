@@ -16,10 +16,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.destroystokyo.paper</groupId>
-      <artifactId>paper-api</artifactId>
-      <version>1.16.5-R0.1-SNAPSHOT</version>
-      <scope>provided</scope>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
     </dependency>
 
     <!-- Adventure для Component — already in Paper 1.17+, for 1.16 shading -->
