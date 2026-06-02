@@ -23,6 +23,7 @@ import com.nonxedy.nonchat.util.death.DamageType;
 import com.nonxedy.nonchat.util.death.DeathMessage;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 import com.nonxedy.nonchat.util.lang.EntityLocalizationUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -76,7 +77,7 @@ public class DeathMessageService {
             }
 
             // Set the death message on the event
-            event.deathMessage(result.component);
+            MessageUtil.deathMessage(event, result.component);
 
             if (deathConfig.isDebugEnabled() && debugger != null) {
                 String messageType = result.isIndirect ? "indirect" : "standard";

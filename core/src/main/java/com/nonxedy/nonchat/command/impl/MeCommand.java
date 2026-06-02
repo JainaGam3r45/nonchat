@@ -17,6 +17,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 
@@ -70,19 +71,19 @@ public class MeCommand implements CommandExecutor, TabCompleter {
      */
     private boolean validateCommandUsage(CommandSender sender) {
         if (!config.isMeCommandEnabled()) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("command-disabled")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("command-disabled")));
             plugin.logError("Me command is disabled");
             return false;
         }
 
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-only")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-only")));
             plugin.logError("Me command used by non-player");
             return false;
         }
 
         if (!sender.hasPermission("nonchat.me")) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             plugin.logError("No permission for me command: " + sender.getName());
             return false;
         }
@@ -97,7 +98,7 @@ public class MeCommand implements CommandExecutor, TabCompleter {
      */
     private void broadcastMeMessage(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-usage-me")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("invalid-usage-me")));
             plugin.logError("Empty me command message from: " + sender.getName());
             return;
         }
@@ -115,7 +116,7 @@ public class MeCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        plugin.getServer().broadcast(ColorUtil.parseComponent(formattedMessage));
+        MessageUtil.broadcast(ColorUtil.parseComponent(formattedMessage));
         plugin.logResponse("Me command executed: " + sender.getName() + " - " + message);
     }
 
@@ -125,7 +126,7 @@ public class MeCommand implements CommandExecutor, TabCompleter {
      * @param e Exception that occurred
      */
     private void handleError(CommandSender sender, Exception e) {
-        sender.sendMessage(ColorUtil.parseComponentCached("&cAn error occurred while executing the command"));
+        MessageUtil.send(sender, ColorUtil.parseComponentCached("&cAn error occurred while executing the command"));
         plugin.logError("Me command error: " + e.getMessage());
     }
 

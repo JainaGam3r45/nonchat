@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 
 import com.nonxedy.nonchat.api.MessageFilter;
 import com.nonxedy.nonchat.config.PluginConfig;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 
@@ -87,10 +88,10 @@ public class AdDetector implements MessageFilter {
         
         Bukkit.getOnlinePlayers().stream()
             .filter(p -> p.hasPermission("nonchat.ad.notify") || p.isOp())
-            .forEach(p -> p.sendMessage(notification));
+            .forEach(p -> MessageUtil.send(p, notification));
             
         // Log to console
-        Bukkit.getConsoleSender().sendMessage(notification);
+        MessageUtil.send(Bukkit.getConsoleSender(), notification);
         
         // Execute configured punishment command with resolved placeholders
         if (punishCommand != null && !punishCommand.isEmpty()) {

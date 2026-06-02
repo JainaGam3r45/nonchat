@@ -23,7 +23,6 @@ import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.listener.DamageTrackingListener;
 import com.nonxedy.nonchat.listener.DeathCoordinates;
 import com.nonxedy.nonchat.listener.DeathListener;
-import com.nonxedy.nonchat.listener.DiscordSRVListener;
 import com.nonxedy.nonchat.listener.JoinQuitListener;
 import com.nonxedy.nonchat.listener.MentionTabCompleteListener;
 import com.nonxedy.nonchat.listener.PlayerCleanupListener;
@@ -37,6 +36,7 @@ import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import dev.faststats.bukkit.BukkitMetrics;
 import dev.faststats.core.ErrorTracker;
@@ -56,7 +56,6 @@ public class Nonchat extends JavaPlugin {
     private SpyCommand spyCommand;
     private Debugger debugger;
     private IgnoreCommand ignoreCommand;
-    private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private InteractivePlaceholderManager placeholderManager;
     private IndirectDeathTracker indirectDeathTracker;
@@ -98,7 +97,7 @@ public class Nonchat extends JavaPlugin {
             setupIntegrations();
             metrics.ready();
             
-            Bukkit.getConsoleSender().sendMessage("§d[nonchat] §aplugin enabled");
+            MessageUtil.send(Bukkit.getConsoleSender(), "§d[nonchat] §aplugin enabled");
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to enable plugin: {0}", e.getMessage());
              throw new RuntimeException("Failed to enable plugin", e);
@@ -305,9 +304,7 @@ public class Nonchat extends JavaPlugin {
                 }
             });
 
-            // Initialize DiscordSRV listener
             if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null) {
-                this.discordSRVListener = new DiscordSRVListener(this);
                 this.discordSRVIntegration = new DiscordSRVIntegration(this);
                 getLogger().info("DiscordSRV integration enabled");
             } else {
@@ -355,10 +352,6 @@ public class Nonchat extends JavaPlugin {
                 commandService.unregisterAll();
             }
 
-            if (discordSRVListener != null) {
-                discordSRVListener.shutdown();
-            }
-
             if (discordSRVIntegration != null) {
                 discordSRVIntegration.unregister();
             }
@@ -374,7 +367,7 @@ public class Nonchat extends JavaPlugin {
             // Cancel all remaining Bukkit tasks for this plugin
             Bukkit.getScheduler().cancelTasks(this);
 
-            Bukkit.getConsoleSender().sendMessage("§d[nonchat] §cplugin disabled");
+            MessageUtil.send(Bukkit.getConsoleSender(), "§d[nonchat] §cplugin disabled");
             
             metrics.shutdown();
 

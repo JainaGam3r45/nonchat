@@ -15,6 +15,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.chat.filters.MessageHistory.MessageEntry;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
@@ -214,7 +215,7 @@ public class SpamDetector implements MessageFilter {
         // Send warning message to player if configured
         if (warnMessage != null && !warnMessage.isEmpty()) {
             String resolvedMessage = resolvePlaceholders(player, warnMessage);
-            player.sendMessage(ColorUtil.parseComponentCached(resolvedMessage));
+            MessageUtil.send(player, ColorUtil.parseComponentCached(resolvedMessage));
         }
     }
 
@@ -284,11 +285,11 @@ public class SpamDetector implements MessageFilter {
         
         Bukkit.getOnlinePlayers().stream()
             .filter(p -> p.hasPermission("nonchat.spam.notify") || p.isOp())
-            .forEach(p -> p.sendMessage(notificationComponent));
+            .forEach(p -> MessageUtil.send(p, notificationComponent));
             
         // Log to console if enabled
         if (config.isAntiSpamConsoleNotifyEnabled()) {
-            Bukkit.getConsoleSender().sendMessage(notificationComponent);
+            MessageUtil.send(Bukkit.getConsoleSender(), notificationComponent);
         }
     }
 

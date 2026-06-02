@@ -15,6 +15,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.core.MessageManager;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 public class ReplyCommand implements CommandExecutor, TabCompleter {
     private final Nonchat plugin;
@@ -32,14 +33,14 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
         plugin.logCommand(command.getName(), args);
 
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-only")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-only")));
             return true;
         }
 
         Player player = (Player) sender;
 
         if (!sender.hasPermission("nonchat.reply")) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to use the reply command without permission.");
             }
@@ -47,7 +48,7 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 1) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-usage-reply")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("invalid-usage-reply")));
             return true;
         }
 

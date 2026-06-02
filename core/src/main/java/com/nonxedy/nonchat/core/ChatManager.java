@@ -26,6 +26,7 @@ import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.SpamDetector;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
@@ -153,7 +154,7 @@ public class ChatManager {
         // Check caps filter
         CapsFilter capsFilter = config.getCapsFilter();
         if (!player.hasPermission("nonchat.caps.bypass") && capsFilter.shouldFilter(message)) {
-            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("caps-filter")
+            MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("caps-filter")
                     .replace("{percentage}", String.valueOf(capsFilter.getMaxCapsPercentage()))));
             return false;
         }
@@ -168,7 +169,7 @@ public class ChatManager {
         // Check advertisements
         if (config.isAntiAdEnabled() && !player.hasPermission("nonchat.ad.bypass")) {
             if (asyncFilterService.shouldFilterAsync(player, message).join()) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("blocked-words")));
+                MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("blocked-words")));
                 return false;
             }
         }
@@ -189,42 +190,21 @@ public class ChatManager {
         Player player = context.player;
         String message = context.messageContent;
 
-        // Determine which channel to use based on message prefix or player's active
-        // channel, checking player permissions first
-        Channel channel = channelManager.getChannelForMessageWithPermission(message, player);
-
-        // If no channel was found by prefix with permission check, try to find a channel 
-        // without prefix that the player has permission for, or use the player's active channel
-        if (channel == null) {
-            // First, try to find a channel without prefix that player has permission for
-            Channel noPrefixChannel = channelManager.getChannelWithoutPrefixForPlayer(player);
-            if (noPrefixChannel != null) {
-                channel = noPrefixChannel;
-                channelManager.setPlayerChannel(player, channel.getId());
-            } else {
-                // Fall back to player's active channel (will be validated later)
-                channel = channelManager.getPlayerChannel(player);
-                if (channel == null) {
-                    return false; // Silently cancel if no channel available
-                }
-            }
+        ChannelManager.ResolvedChannelMessage resolvedMessage = channelManager.resolveChannelMessage(message, player);
+        if (resolvedMessage == null) {
+            return false;
         }
 
-        String finalMessage;
-        // If a channel was found by prefix, update player's active channel and remove
-        // the prefix. This is needed for DiscordSRV to see the correct channel.
-        if (channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
-            channelManager.setPlayerChannel(player, channel.getId());
-            finalMessage = message.substring(channel.getPrefix().length());
-            if (finalMessage.trim().isEmpty()) {
-                return false; // Silently cancel empty messages after removing prefix
-            }
-        } else {
-            finalMessage = message;
+        if (resolvedMessage.updatePlayerChannel()) {
+            channelManager.setPlayerChannel(player, resolvedMessage.channel().getId());
         }
 
-        context.channel = channel;
-        context.finalMessage = finalMessage;
+        if (resolvedMessage.message().trim().isEmpty()) {
+            return false;
+        }
+
+        context.channel = resolvedMessage.channel();
+        context.finalMessage = resolvedMessage.message();
         return true;
     }
 
@@ -235,13 +215,13 @@ public class ChatManager {
 
         // Check if channel is enabled
         if (!channel.isEnabled()) {
-            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("chat-disabled")));
+            MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("chat-disabled")));
             return false;
         }
 
         // Check permissions
         if (!channel.canSend(player)) {
-            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             return false;
         }
 
@@ -249,12 +229,12 @@ public class ChatManager {
         String messageForLengthCheck = player.hasPermission("nonchat.color") ? finalMessage
                 : ColorUtil.stripAllColors(finalMessage);
         if (messageForLengthCheck.length() < channel.getMinLength()) {
-            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-short")
+            MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("message-too-short")
                     .replace("{min}", String.valueOf(channel.getMinLength()))));
             return false;
         }
         if (channel.getMaxLength() > 0 && messageForLengthCheck.length() > channel.getMaxLength()) {
-            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-long")
+            MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("message-too-long")
                     .replace("{max}", String.valueOf(channel.getMaxLength()))));
             return false;
         }
@@ -262,7 +242,7 @@ public class ChatManager {
         // Check cooldown
         if (!channelManager.canSendMessage(player, channel)) {
             int remainingSeconds = channelManager.getRemainingCooldown(player, channel);
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-cooldown")
+            MessageUtil.send(player, ColorUtil.parseComponent(messages.getString("channel-cooldown")
                     .replace("{seconds}", String.valueOf(remainingSeconds))
                     .replace("{channel}", channel.getDisplayName())));
             return false;
@@ -280,7 +260,7 @@ public class ChatManager {
 
         // Check API filters
         if (ChannelAPI.shouldFilterMessage(player, finalMessage, channel.getId())) {
-            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-filtered")));
+            MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("message-filtered")));
             return false;
         }
 
@@ -311,7 +291,7 @@ public class ChatManager {
 
         // Notify if message wasn't delivered
         if (config.isUndeliveredMessageNotificationEnabled() && !context.messageDelivered) {
-            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
+            MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
         }
     }
 
@@ -541,7 +521,7 @@ public class ChatManager {
             // Check blocked words on the message without color codes
             String messageToCheck = ColorUtil.stripAllColors(message);
             if (!wordBlocker.isMessageAllowed(messageToCheck)) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("blocked-words")));
+                MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("blocked-words")));
                 return true;
             }
         }
@@ -582,7 +562,7 @@ public class ChatManager {
         // Replace {player} with sender name (keeping this for backward compatibility)
         mentionMessage = mentionMessage.replace("{player}", sender.getName());
 
-        mentioned.sendMessage(ColorUtil.parseComponent(mentionMessage));
+        MessageUtil.send(mentioned, ColorUtil.parseComponent(mentionMessage));
 
         // Play mention sound if enabled for mention events
         if (config.isMentionSoundEnabled()) {
@@ -654,7 +634,7 @@ public class ChatManager {
         }
 
         // Send to console with processed format
-        Bukkit.getConsoleSender().sendMessage(ColorUtil.parseComponent(consoleFormat));
+        MessageUtil.send(Bukkit.getConsoleSender(), ColorUtil.parseComponent(consoleFormat));
 
         // Count how many players received the message
         long recipientCount = Bukkit.getOnlinePlayers().stream()
@@ -666,7 +646,7 @@ public class ChatManager {
                     (channel.canReceive(recipient) && 
                      (channel.isGlobal() || channel.isInRange(sender, recipient))))
                 // Send message to filtered recipients and count them
-                .peek(recipient -> recipient.sendMessage(message))
+                .peek(recipient -> MessageUtil.send(recipient, message))
                 .count();
 
         // Return true if at least one player (other than sender) received the message

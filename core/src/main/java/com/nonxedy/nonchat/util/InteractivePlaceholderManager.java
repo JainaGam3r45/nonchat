@@ -1,6 +1,8 @@
 package com.nonxedy.nonchat.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,7 +15,7 @@ import com.nonxedy.nonchat.api.InteractivePlaceholder;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.JoinConfiguration;
 
 /**
  * Manager for handling interactive placeholders
@@ -68,61 +70,58 @@ public class InteractivePlaceholderManager {
         return placeholders.containsKey(placeholderName.toLowerCase());
     }
 
-    /**
-     * Processes a message and replaces interactive placeholders with their components
-     *
-     * @param player The player who sent the message
-     * @param message The message to process
-     * @return Component with placeholders replaced
-     */
     @NotNull
     public Component processMessage(@NotNull Player player, @NotNull String message) {
         if (message.isEmpty()) {
             return Component.text(message);
         }
 
-        TextComponent.Builder builder = Component.text().content("");
+        List<Component> parts = new ArrayList<>();
         Matcher matcher = placeholderPattern.matcher(message);
         int lastEnd = 0;
 
         while (matcher.find()) {
-            // Add text before the placeholder
             if (matcher.start() > lastEnd) {
                 String textBefore = message.substring(lastEnd, matcher.start());
-                builder.append(LinkDetector.makeLinksClickable(textBefore));
+                parts.add(LinkDetector.makeLinksClickable(textBefore));
             }
 
             String placeholderName = matcher.group(1).toLowerCase();
-            String arguments = matcher.group(2); // Arguments after colon, can be null
-
+            String arguments = matcher.group(2);
             InteractivePlaceholder placeholder = getPlaceholder(placeholderName);
+
             if (placeholder != null && placeholder.isEnabled()) {
-                // Check permission if required
                 String permission = placeholder.getPermission();
-                if (permission == null || permission.isEmpty() || player.hasPermission(permission)) {
-                    // Process the placeholder
-                    String[] args = arguments != null ? arguments.split(":") : new String[0];
-                    Component placeholderComponent = placeholder.process(player, args);
-                    builder.append(placeholderComponent);
+                if (permission == null || permission.isEmpty()
+                        || player.hasPermission(permission)) {
+                    String[] args = arguments != null
+                            ? arguments.split(":")
+                            : new String[0];
+                    parts.add(placeholder.process(player, args));
                 } else {
-                    // No permission, add as plain text
-                    builder.append(Component.text(matcher.group()));
+                    parts.add(Component.text(matcher.group()));
                 }
             } else {
-                // Placeholder not found or disabled, add as plain text
-                builder.append(Component.text(matcher.group()));
+                parts.add(Component.text(matcher.group()));
             }
 
             lastEnd = matcher.end();
         }
 
-        // Add remaining text
         if (lastEnd < message.length()) {
-            String remainingText = message.substring(lastEnd);
-            builder.append(LinkDetector.makeLinksClickable(remainingText));
+            parts.add(LinkDetector.makeLinksClickable(
+                message.substring(lastEnd)
+            ));
         }
 
-        return builder.build();
+        if (parts.isEmpty()) {
+            return Component.text(message);
+        }
+
+        return Component.join(
+            JoinConfiguration.noSeparators(),
+            parts
+        );
     }
 
     /**

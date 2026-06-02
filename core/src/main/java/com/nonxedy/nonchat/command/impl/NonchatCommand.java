@@ -14,6 +14,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -76,7 +77,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     private boolean handleReloadCommand(CommandSender sender) {
         // Check if sender has permission
         if (!sender.hasPermission("nonchat.reload")) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             plugin.logError("No permission for /nonchat reload command: " + sender.getName());
             return true;
         }
@@ -84,18 +85,18 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         // Perform the full reload
         try {
             // Send reload start message
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("reloading")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("reloading")));
             plugin.logResponse("Initiating config reload...");
 
             // Execute reload operations (includes death messages)
             executeReload();
 
             // Send success message
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("reloaded")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("reloaded")));
             plugin.logResponse("Configuration reload successful");
         } catch (Exception e) {
             // Handle any errors during reload
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("reload-failed")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("reload-failed")));
             plugin.logError("Configuration reload failed: " + e.getMessage());
         }
 
@@ -121,7 +122,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     private boolean handleHelpCommand(CommandSender sender) {
         // Check if sender has permission
         if (!sender.hasPermission("nonchat.help")) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             plugin.logError("No permission for /nonchat help command: " + sender.getName());
             return true;
         }
@@ -137,7 +138,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     private boolean handleVersionCommand(CommandSender sender) {
         // Check if sender has permission
         if (!sender.hasPermission("nonchat.version")) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             plugin.logError("No permission for /nonchat version command: " + sender.getName());
             return true;
         }
@@ -158,7 +159,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
                 .append(Component.newline())
                 .append(getCommandsList());
 
-            sender.sendMessage(helpMessage);
+            MessageUtil.send(sender, helpMessage);
             plugin.logResponse("Help message sent successfully");
         } catch (Exception e) {
             plugin.logError("Failed to send help message: " + e.getMessage());
@@ -176,7 +177,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             String versionMessage = messages.getString("version").replace("{version}", version);
             // Make links clickable in the version message
             Component versionComponent = LinkDetector.makeLinksClickable(versionMessage);
-            sender.sendMessage(versionComponent);
+            MessageUtil.send(sender, versionComponent);
             plugin.logResponse("Version message sent successfully");
         } catch (Exception e) {
             plugin.logError("Failed to send version message: " + e.getMessage());

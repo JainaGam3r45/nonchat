@@ -16,6 +16,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -75,7 +76,7 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
      * @param sender Command sender
      */
     private void sendNoPermissionMessage(CommandSender sender) {
-        sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+        MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
         plugin.logError("Sender doesn't have broadcast permission");
     }
 
@@ -84,7 +85,7 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
      * @param sender Command sender
      */
     private void sendUsageMessage(CommandSender sender) {
-        sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("broadcast-command")));
+        MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("broadcast-command")));
         plugin.logError("Invalid usage: /bc <message>");
     }
 
@@ -117,11 +118,11 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
 
             // Send to all online players with spacing
             plugin.getServer().getOnlinePlayers().forEach(player -> {
-                player.sendMessage(broadcastComponent);
+                MessageUtil.send(player, broadcastComponent);
             });
 
             // Send to server console
-            plugin.getServer().getConsoleSender().sendMessage(broadcastComponent);
+            MessageUtil.send(plugin.getServer().getConsoleSender(), broadcastComponent);
             plugin.logResponse("Broadcast sent successfully");
         } catch (Exception e) {
             plugin.logError("Failed to send broadcast: " + e.getMessage());

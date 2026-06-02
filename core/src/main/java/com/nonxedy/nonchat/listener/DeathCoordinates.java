@@ -11,6 +11,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 /**
  * Handles death location tracking and messaging
@@ -48,7 +49,7 @@ public class DeathCoordinates implements Listener {
                 deathLoc.getBlockZ()
             );
             
-            player.sendMessage(ColorUtil.parseComponent(coordsMessage));
+            MessageUtil.send(player, ColorUtil.parseComponent(coordsMessage));
         }
     }
     

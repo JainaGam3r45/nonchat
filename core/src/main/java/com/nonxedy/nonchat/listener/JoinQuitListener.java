@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 
@@ -89,7 +90,7 @@ public class JoinQuitListener implements Listener {
             }
         }
         
-        event.joinMessage(ColorUtil.parseComponent(joinFormat));
+        MessageUtil.joinMessage(event, ColorUtil.parseComponent(joinFormat));
         
         // Play join sound if enabled for join events
         if (config.isJoinSoundEnabled()) {
@@ -134,7 +135,7 @@ public class JoinQuitListener implements Listener {
             }
         }
         
-        event.quitMessage(ColorUtil.parseComponent(quitFormat));
+        MessageUtil.quitMessage(event, ColorUtil.parseComponent(quitFormat));
         
         // Play quit sound if enabled for quit events
         if (config.isQuitSoundEnabled()) {

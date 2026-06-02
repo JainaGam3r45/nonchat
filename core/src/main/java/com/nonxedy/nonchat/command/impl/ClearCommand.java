@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -71,7 +72,7 @@ public class ClearCommand implements CommandExecutor, TabCompleter {
         // Check for nonchat.clear permission
         if (!sender.hasPermission("nonchat.clear")) {
             // Send no permission message
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             // Log attempt to execute command without permission
             plugin.logError("Player attempted to clear chat without permission");
             return false;
@@ -87,7 +88,7 @@ public class ClearCommand implements CommandExecutor, TabCompleter {
             // Send empty lines to all players
             for (Player player : Bukkit.getOnlinePlayers()) {
                 for (int i = 0; i < CLEAR_LINES; i++) {
-                    player.sendMessage(emptyLine);
+                    MessageUtil.send(player, emptyLine);
                 }
             }
             // Log successful clearing
@@ -97,7 +98,7 @@ public class ClearCommand implements CommandExecutor, TabCompleter {
             plugin.logError("Failed to clear chat: " + e.getMessage());
             // Send error message to all players
             for (Player player : Bukkit.getOnlinePlayers()) {
-                player.sendMessage(Component.text("Failed to clear chat")
+                MessageUtil.send(player, Component.text("Failed to clear chat")
                         .color(NamedTextColor.RED));
             }
         }
@@ -106,7 +107,7 @@ public class ClearCommand implements CommandExecutor, TabCompleter {
     // Sends chat clear notification
     private void sendClearNotification() {
         // Send message to all players that chat was cleared
-        Bukkit.broadcast(ColorUtil.parseComponentCached(messages.getString("chat-cleared")));
+        MessageUtil.broadcast(ColorUtil.parseComponentCached(messages.getString("chat-cleared")));
     }
 
     /**

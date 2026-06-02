@@ -23,6 +23,7 @@ import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.chat.formatting.PrivateMessageUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -90,7 +91,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Check if sender has permission to use private messaging
         if (!sender.hasPermission("nonchat.message")) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
             }
@@ -99,7 +100,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Validate command arguments (need at least target player and message)
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-usage-message")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("invalid-usage-message")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to use the message command with invalid arguments.");
             }
@@ -109,7 +110,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         // Get target player and verify they are online
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-not-found")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-not-found")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to message a player that is not online.");
             }
@@ -118,7 +119,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Check if target player has ignored the sender
         if (isIgnored(sender, target)) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to message a player that has ignored them.");
             }
@@ -127,7 +128,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         
         // Check if sender is ignoring the target
         if (sender instanceof Player && isIgnoringTarget((Player)sender, target)) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
+            MessageUtil.send(sender, ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
                     .replace("{player}", target.getName())));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to message a player they are ignoring.");
@@ -237,7 +238,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         Component senderMessage = PrivateMessageUtil.createSenderMessage(config, 
             sender instanceof Player player ? player : null, target, processedMessage);
         
-        sender.sendMessage(senderMessage);
+        MessageUtil.send(sender, senderMessage);
         if (plugin != null) {
             plugin.logResponse("Message sent to " + sender.getName());
         }
@@ -246,7 +247,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         Component targetMessage = PrivateMessageUtil.createReceiverMessage(config, 
             sender instanceof Player player ? player : null, target, processedMessage);
         
-        target.sendMessage(targetMessage);
+        MessageUtil.send(target, targetMessage);
         if (plugin != null) {
             plugin.logResponse("Message sent to " + target.getName());
         }

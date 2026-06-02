@@ -14,6 +14,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -118,7 +119,7 @@ public class AutoBroadcastSender {
 
         // Send to all players
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(broadcastMessage);
+            MessageUtil.send(player, broadcastMessage);
         }
 
         // Log to console (strip formatting for cleaner logs)

@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.nonxedy.nonchat</groupId>
     <artifactId>nonchat-parent</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
   </parent>
 
   <artifactId>nonchat-v1_19_R3</artifactId>
@@ -18,6 +18,10 @@
     <dependency>
       <groupId>com.nonxedy.nonchat</groupId>
       <artifactId>nonchat-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.nonxedy.nonchat</groupId>
+      <artifactId>nonchat-core</artifactId>
     </dependency>
 
     <dependency>
