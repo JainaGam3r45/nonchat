@@ -1,10 +1,10 @@
 package com.nonxedy.nonchat.adapter.v1_19_R3;
 
 import com.nonxedy.nonchat.api.ServiceAdapter;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
@@ -17,6 +17,11 @@ import org.joml.Vector3f;
 public abstract class AbstractBubblePlatformAdapter extends ServiceAdapter {
     protected AbstractBubblePlatformAdapter(String supportedVersion) {
         super(supportedVersion);
+    }
+
+    @Override
+    public boolean supports(String bukkitVersion) {
+        return isPaperAsyncChatAvailable() && super.supports(bukkitVersion);
     }
 
     @Override
@@ -42,7 +47,7 @@ public abstract class AbstractBubblePlatformAdapter extends ServiceAdapter {
         for (int i = 0; i < lines.length; i++) {
             Location lineLocation = location.clone().add(0.0D, (lines.length - i - 1) * 0.25D, 0.0D);
             TextDisplay display = player.getWorld().spawn(lineLocation, TextDisplay.class);
-            display.text(Component.text(lines[i]));
+            display.text(ColorUtil.parseComponent(lines[i]));
             display.setPersistent(false);
             display.setInvulnerable(true);
             display.setShadowed(false);
@@ -135,5 +140,14 @@ public abstract class AbstractBubblePlatformAdapter extends ServiceAdapter {
         }
 
         return Color.BLACK;
+    }
+
+    private boolean isPaperAsyncChatAvailable() {
+        try {
+            Class.forName("io.papermc.paper.event.player.AsyncChatEvent");
+            return true;
+        } catch (ClassNotFoundException ignored) {
+            return false;
+        }
     }
 }

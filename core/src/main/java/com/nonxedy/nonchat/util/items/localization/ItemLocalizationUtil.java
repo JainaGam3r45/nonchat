@@ -7,6 +7,8 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -87,7 +89,7 @@ public class ItemLocalizationUtil {
         
         // Check if item has custom display name - use that instead of translating
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            return item.getItemMeta().displayName();
+            return ColorUtil.parseComponent(item.getItemMeta().getDisplayName());
         }
         
         // Get the translation key for this item
@@ -131,8 +133,7 @@ public class ItemLocalizationUtil {
         
         // Check if item has custom display name
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            return PlainTextComponentSerializer.plainText()
-                    .serialize(item.getItemMeta().displayName());
+            return ColorUtil.stripFormatting(item.getItemMeta().getDisplayName());
         }
         
         // Get the translation key for this item

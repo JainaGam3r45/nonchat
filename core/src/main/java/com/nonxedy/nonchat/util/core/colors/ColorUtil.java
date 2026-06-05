@@ -20,7 +20,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.object.PlayerHeadObjectContents;
-import net.md_5.bungee.api.ChatColor;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ConcurrentLRUCache
@@ -149,7 +148,7 @@ public final class ColorUtil {
             "§x§([0-9a-fA-F])§([0-9a-fA-F])§([0-9a-fA-F])§([0-9a-fA-F])§([0-9a-fA-F])§([0-9a-fA-F])");
 
     static final Pattern MINIMESSAGE_TAG_PATTERN =
-            Pattern.compile("</?[a-zA-Z][a-zA-Z0-9_:-]*(?::[^<>\\r\\n]*)? >|<#[0-9a-fA-F]{6}>");
+            Pattern.compile("</?[a-zA-Z][a-zA-Z0-9_:-]*(?::[^<>\\r\\n]*)?>|<#[0-9a-fA-F]{6}>");
 
     private static final Pattern GRADIENT_PATTERN =
             Pattern.compile("(?i)<gradient:[^>]+>");
@@ -522,7 +521,7 @@ public final class ColorUtil {
         ampMatcher.appendTail(ampBuffer);
         String preProcessed = ampBuffer.toString();
 
-        String withTranslated = ChatColor.translateAlternateColorCodes('&', preProcessed);
+        String withTranslated = translateAmpersandCodes(preProcessed);
 
         // &#RRGGBB → §x§R§G§B§R§G§B
         Matcher hexMatcher = HEX_PATTERN.matcher(withTranslated);
@@ -680,6 +679,27 @@ public final class ColorUtil {
         return result.toString();
     }
 
+    private static @NotNull String translateAmpersandCodes(@NotNull String message) {
+        char[] chars = message.toCharArray();
+        for (int i = 0; i < chars.length - 1; i++) {
+            if (chars[i] == '&' && isLegacyColorCode(chars[i + 1])) {
+                chars[i] = '\u00A7';
+                chars[i + 1] = Character.toLowerCase(chars[i + 1]);
+            }
+        }
+        return new String(chars);
+    }
+
+    private static boolean isLegacyColorCode(char code) {
+        return (code >= '0' && code <= '9')
+            || (code >= 'a' && code <= 'f')
+            || (code >= 'A' && code <= 'F')
+            || (code >= 'k' && code <= 'o')
+            || (code >= 'K' && code <= 'O')
+            || code == 'r'
+            || code == 'R';
+    }
+
     private static @Nullable String legacyCodeToMiniMessageTag(char code) {
         return switch (code) {
             case '0'       -> "<reset><black>";
@@ -714,7 +734,12 @@ public final class ColorUtil {
 
     private static @NotNull Component fallbackParse(@NotNull String message) {
         try {
-            return LegacyComponentSerializer.legacySection().deserialize(parseColor(message));
+            return LegacyComponentSerializer.builder()
+                    .character(LegacyComponentSerializer.SECTION_CHAR)
+                    .hexColors()
+                    .useUnusualXRepeatedCharacterHexFormat()
+                    .build()
+                    .deserialize(parseColor(message));
         } catch (Exception ignored) {
             return Component.text(stripFormattingFallback(message));
         }
