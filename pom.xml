@@ -40,17 +40,12 @@
     <discordsrv.version>1.28.0</discordsrv.version>
     <commonslang.version>3.20.0</commonslang.version>
     <faststats.version>0.22.0</faststats.version>
-    <spigot.version>1.16.5-R0.1-SNAPSHOT</spigot.version>
   </properties>
 
   <repositories>
     <repository>
       <id>papermc-repo</id>
       <url>https://repo.papermc.io/repository/maven-public/</url>
-    </repository>
-    <repository>
-      <id>spigot-repo</id>
-      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <repository>
       <id>aikar</id>
@@ -91,12 +86,6 @@
         <groupId>com.nonxedy.nonchat</groupId>
         <artifactId>nonchat-core</artifactId>
         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.spigotmc</groupId>
-        <artifactId>spigot-api</artifactId>
-        <version>${spigot.version}</version>
-        <scope>provided</scope>
       </dependency>
 
       <!-- External — provided (server has them) -->

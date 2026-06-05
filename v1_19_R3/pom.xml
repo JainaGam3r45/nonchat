@@ -19,10 +19,6 @@
       <groupId>com.nonxedy.nonchat</groupId>
       <artifactId>nonchat-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.nonxedy.nonchat</groupId>
-      <artifactId>nonchat-core</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>io.papermc.paper</groupId>

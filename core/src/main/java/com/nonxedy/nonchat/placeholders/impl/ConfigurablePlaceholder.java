@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +20,7 @@ import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 /**
@@ -262,15 +262,18 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
         text = text.replace("{item_amount}", String.valueOf(item.getAmount()));
         text = text.replace("{item_id}", item.getType().getKey().getKey());
 
-        ItemMeta itemMeta = item.getItemMeta();
-        if (itemMeta != null && itemMeta.hasLore()) {
+        // Lore - use Adventure API's lore() instead of deprecated getLore()
+        if (item.getItemMeta() != null && item.getItemMeta().hasLore()) {
             StringBuilder loreBuilder = new StringBuilder();
-            List<String> loreLines = itemMeta.getLore();
-            if (loreLines != null) {
-                for (String loreLine : loreLines) {
+            List<Component> loreComponents = item.getItemMeta().lore();
+            if (loreComponents != null) {
+                for (Component loreLine : loreComponents) {
                     if (loreBuilder.length() > 0)
                         loreBuilder.append("\n");
-                    loreBuilder.append(loreLine);
+                    // Convert Component to MiniMessage format to preserve all formatting
+                    // This handles gradients, hex colors, and other advanced formatting
+                    String coloredLore = MiniMessage.miniMessage().serialize(loreLine);
+                    loreBuilder.append(coloredLore);
                 }
             }
             text = text.replace("{item_lore}", loreBuilder.toString());
