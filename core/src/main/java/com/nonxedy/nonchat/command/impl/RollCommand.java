@@ -101,7 +101,7 @@ public class RollCommand implements CommandExecutor, TabCompleter {
                 }
             }
 
-            MessageUtil.broadcast(ColorUtil.parseComponent(format));
+            sender.getServer().broadcast(ColorUtil.parseComponent(format));
             plugin.logResponse("Player " + sender.getName() + " used roll command");
             return true;
 

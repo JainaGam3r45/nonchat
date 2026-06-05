@@ -116,7 +116,7 @@ public class MeCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        MessageUtil.broadcast(ColorUtil.parseComponent(formattedMessage));
+        plugin.getServer().broadcast(ColorUtil.parseComponent(formattedMessage));
         plugin.logResponse("Me command executed: " + sender.getName() + " - " + message);
     }
 

@@ -17,6 +17,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 
+import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
+
 public class MentionTabCompleteListener implements Listener {
 
     public void refreshAllPlayers() {
@@ -57,8 +59,23 @@ public class MentionTabCompleteListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onAsyncTabComplete(AsyncTabCompleteEvent event) {
+        if (event.isCommand() || !(event.getSender() instanceof Player player)) {
+            return;
+        }
+
+        List<String> suggestions = getMentionSuggestions(player, extractLastToken(event.getBuffer()));
+        if (suggestions.isEmpty()) {
+            return;
+        }
+
+        event.setCompletions(suggestions);
+        event.setHandled(true);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onTabComplete(TabCompleteEvent event) {
-        if (isCommandBuffer(event.getBuffer()) || !(event.getSender() instanceof Player player)) {
+        if (event.isCommand() || !(event.getSender() instanceof Player player)) {
             return;
         }
 
@@ -86,10 +103,6 @@ public class MentionTabCompleteListener implements Listener {
 
         int lastSpace = buffer.lastIndexOf(' ');
         return lastSpace >= 0 ? buffer.substring(lastSpace + 1) : buffer;
-    }
-
-    private boolean isCommandBuffer(String buffer) {
-        return buffer != null && buffer.startsWith("/");
     }
 
     private List<String> getOnlinePlayerMentions(Player sender, String partialName) {

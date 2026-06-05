@@ -5,9 +5,7 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.items.localization.ItemLocalizationUtil;
 import com.nonxedy.nonchat.util.lang.TranslationUtil;
 
@@ -15,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
  * Utility class for creating item displays in chat with client-side localization
@@ -54,7 +53,8 @@ public class ItemDisplayUtil {
         
         // Check if item has custom display name with formatting
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            Component displayNameComponent = ColorUtil.parseComponent(item.getItemMeta().getDisplayName());
+            // Use the original item display name component (preserving custom colors)
+            Component displayNameComponent = item.getItemMeta().displayName();
             
             // Create bracketed component with custom name
             Component itemComponent = Component.text("[")
@@ -98,7 +98,8 @@ public class ItemDisplayUtil {
         
         // Add item name - preserve original formatting if it has custom display name
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            Component displayNameComponent = ColorUtil.parseComponent(item.getItemMeta().getDisplayName())
+            // Use the original display name component with all formatting
+            Component displayNameComponent = item.getItemMeta().displayName()
                 .decoration(TextDecoration.ITALIC, false)
                 .decoration(TextDecoration.BOLD, false);
             lines.add(displayNameComponent);
@@ -134,15 +135,15 @@ public class ItemDisplayUtil {
         
         // Add lore if exists
         if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            ItemMeta itemMeta = item.getItemMeta();
-            List<String> lore = itemMeta != null ? itemMeta.getLore() : null;
+            List<Component> lore = item.getItemMeta().lore();
             
             if (lore != null && !lore.isEmpty()) {
                 // Add a blank line after name
                 lines.add(Component.text(""));
                 
-                for (String loreLine : lore) {
-                    lines.add(ColorUtil.parseComponent(loreLine));
+                // Add each lore line (already as Component)
+                for (Component loreLine : lore) {
+                    lines.add(loreLine);
                 }
             }
         }
@@ -168,7 +169,8 @@ public class ItemDisplayUtil {
      */
     public static String getItemName(ItemStack item) {
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            return ColorUtil.stripFormatting(item.getItemMeta().getDisplayName());
+            return PlainTextComponentSerializer.plainText()
+                .serialize(item.getItemMeta().displayName());
         } else {
             return formatMaterialName(item.getType().name());
         }
