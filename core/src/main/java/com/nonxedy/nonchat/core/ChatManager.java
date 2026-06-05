@@ -619,9 +619,12 @@ public class ChatManager {
      * @return true if the message was delivered to at least one player, false
      *         otherwise
      */
-    private boolean broadcastMessage(Player sender, Component message,
-                                     Channel channel, String originalMessage) {
+    private boolean broadcastMessage(Player sender, Component message, Channel channel, String originalMessage) {
+        // For console, create a simple message without our color modifications to avoid
+        // &f appearing
         String consoleFormat = channel.getFormat().replace("{message}", originalMessage);
+
+        // Apply PlaceholderAPI for console
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
                 consoleFormat = PlaceholderAPI.setPlaceholders(sender, consoleFormat);
@@ -629,17 +632,25 @@ public class ChatManager {
                 plugin.logError("Error processing format placeholders for console: " + e.getMessage());
             }
         }
+
+        // Send to console with processed format
         MessageUtil.send(Bukkit.getConsoleSender(), ColorUtil.parseComponent(consoleFormat));
 
+        // Count how many players received the message
         long recipientCount = Bukkit.getOnlinePlayers().stream()
-            .filter(recipient -> ignoreCommand == null
-                    || !ignoreCommand.isIgnoring(recipient, sender))
-            .filter(recipient -> recipient.hasPermission("nonchat.spy.all")
-                    || (channel.canReceive(recipient)
-                        && (channel.isGlobal() || channel.isInRange(sender, recipient))))
-            .peek(recipient -> MessageUtil.send(recipient, message))
-            .count();
+                // Skip players ignoring the sender
+                .filter(recipient -> ignoreCommand == null || !ignoreCommand.isIgnoring(recipient, sender))
+                // Check for spy.all permission - bypass all restrictions
+                .filter(recipient -> recipient.hasPermission("nonchat.spy.all") || 
+                    // Normal filtering for players without spy.all permission
+                    (channel.canReceive(recipient) && 
+                     (channel.isGlobal() || channel.isInRange(sender, recipient))))
+                // Send message to filtered recipients and count them
+                .peek(recipient -> MessageUtil.send(recipient, message))
+                .count();
 
+        // Return true if at least one player (other than sender) received the message
+        // We subtract 1 because the sender is also counted in the recipients
         return recipientCount > 1;
     }
 

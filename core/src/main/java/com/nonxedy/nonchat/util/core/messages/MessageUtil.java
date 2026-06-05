@@ -10,16 +10,19 @@ import org.jetbrains.annotations.NotNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
+/**
+ * Sends Adventure components through Bukkit APIs that are available on Spigot
+ */
 public final class MessageUtil {
 
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER =
-        LegacyComponentSerializer.builder()
-            .character(LegacyComponentSerializer.SECTION_CHAR)
-            .hexColors()
-            .useUnusualXRepeatedCharacterHexFormat()
-            .build();
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.builder()
+        .character(LegacyComponentSerializer.SECTION_CHAR)
+        .hexColors()
+        .useUnusualXRepeatedCharacterHexFormat()
+        .build();
 
-    private MessageUtil() {}
+    private MessageUtil() {
+    }
 
     public static void send(@NotNull CommandSender sender, @NotNull Component message) {
         sender.sendMessage(toLegacy(message));
