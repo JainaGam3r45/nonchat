@@ -25,8 +25,6 @@ import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
  * Manages all chat channels in the nonchat plugin.
  */
 public class ChannelManager {
-    public record ResolvedChannelMessage(Channel channel, String message, boolean updatePlayerChannel) {}
-
     private final Map<String, Channel> channels = new ConcurrentHashMap<>();
     private final Map<Player, Channel> playerChannels = new ConcurrentHashMap<>();
     private final Map<Player, Long> lastMessageTimes = new ConcurrentHashMap<>();
@@ -606,19 +604,20 @@ public class ChannelManager {
         }
 
         Channel channel = getChannelForMessageWithPermission(message, player);
+        Channel currentChannel = getPlayerChannel(player);
         boolean updatePlayerChannel = false;
         String resolvedMessage = message;
 
         if (channel != null) {
-            updatePlayerChannel = true;
+            updatePlayerChannel = !channel.getId().equals(currentChannel.getId());
             resolvedMessage = message.substring(channel.getPrefix().length());
         } else {
             Channel noPrefixChannel = getChannelWithoutPrefixForPlayer(player);
             if (noPrefixChannel != null) {
                 channel = noPrefixChannel;
-                updatePlayerChannel = true;
+                updatePlayerChannel = !channel.getId().equals(currentChannel.getId());
             } else {
-                channel = getPlayerChannel(player);
+                channel = currentChannel;
             }
         }
 

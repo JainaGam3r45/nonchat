@@ -17,6 +17,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
+import com.nonxedy.nonchat.chat.channel.ResolvedChannelMessage;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
@@ -189,7 +190,7 @@ public class ChatManager {
         Player player = context.player;
         String message = context.messageContent;
 
-        ChannelManager.ResolvedChannelMessage resolvedMessage = channelManager.resolveChannelMessage(message, player);
+        ResolvedChannelMessage resolvedMessage = channelManager.resolveChannelMessage(message, player);
         if (resolvedMessage == null) {
             return false;
         }
