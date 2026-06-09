@@ -20,16 +20,17 @@ public class ChatTypeUtil {
     private final int cooldown;
     private final int minLength;
     private final int maxLength;
+    private final String switchMessage;
 
     // Legacy constructor for backward compatibility
     public ChatTypeUtil(boolean enabled, String format, int radius, char chatChar, String permission) {
-        this(enabled, null, format, radius, chatChar, permission, null, 0, 0, -1);
+        this(enabled, null, format, radius, chatChar, permission, null, 0, 0, -1, "");
     }
 
     // Full constructor with all properties
     public ChatTypeUtil(boolean enabled, String displayName, String format, int radius, char chatChar, 
                         String sendPermission, String receivePermission,
-                        int cooldown, int minLength, int maxLength) {
+                        int cooldown, int minLength, int maxLength, String switchMessage) {
         this.enabled = enabled;
         this.displayName = displayName != null ? displayName : "Channel";
         this.format = format;
@@ -40,6 +41,7 @@ public class ChatTypeUtil {
         this.cooldown = cooldown;
         this.minLength = minLength;
         this.maxLength = maxLength;
+        this.switchMessage = switchMessage != null ? switchMessage : "";
     }
     
     /**

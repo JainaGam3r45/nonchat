@@ -135,4 +135,16 @@ public interface Channel {
      * @return Maximum length
      */
     int getMaxLength();
+
+    /**
+     * Gets the message sent to a player when they switch to this channel.
+     * @return Switch message, or empty string if none.
+     */
+    String getSwitchMessage();
+
+    /**
+     * Checks if this channel has a switch message configured.
+     * @return True if a switch message is set.
+     */
+    boolean hasSwitchMessage();
 }
