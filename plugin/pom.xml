@@ -78,6 +78,11 @@
       <artifactId>nonchat-v26_1_R1</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.nonxedy.nonchat</groupId>
+      <artifactId>nonchat-v26_2_R1</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
