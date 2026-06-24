@@ -46,7 +46,6 @@
 | `/channel` | Channel management commands |
 | `/nonchat help` | View plugin help |
 | `/nonchat reload` | Reload plugin configuration |
-| `/nonchat version` | Show plugin version |
 
 ## 🔧 Interactive Chat Placeholders
 

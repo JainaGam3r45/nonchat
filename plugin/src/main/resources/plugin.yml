@@ -26,7 +26,6 @@ permissions:
       - nonchat.server
       - nonchat.reload
       - nonchat.help
-      - nonchat.version
       - nonchat.clear
       - nonchat.ignore
       - nonchat.sc
@@ -59,9 +58,6 @@ permissions:
     default: op
   nonchat.help:
     description: Allows /nonchat help command
-    default: true
-  nonchat.version:
-    description: Allows /nonchat version command
     default: true
   nonchat.clear:
     description: Allows /clear command
@@ -142,7 +138,7 @@ commands:
     permission-message: You do not have <permission> to use this command!
   nonchat:
     description: Main plugin command for nonchat.
-    usage: /nonchat <reload|help|version>
+    usage: /nonchat <reload|help>
     permission: nonchat.help
     permission-message: You do not have <permission> to use this command!
   clear:
