@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 
 import com.nonxedy.nonchat.api.IMessageHandler;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public final class ChatListener262 implements Listener {
@@ -17,7 +18,7 @@ public final class ChatListener262 implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerChat(io.papermc.paper.event.player.AsyncChatEvent event) {
+    public void onPlayerChat(AsyncChatEvent event) {
         event.setCancelled(true);
         handler.handleChat(event.getPlayer(), PLAIN_TEXT.serialize(event.message()));
     }
