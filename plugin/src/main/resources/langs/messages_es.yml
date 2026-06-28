@@ -3,7 +3,7 @@
 # Plugin creado por utophii (@utophii).
 # Publicado en github https://github.com/utophii/nonchat
 # Publicado en modrinth https://modrinth.com/plugin/nonchat
-# Versión del plugin: 1.6.1
+# Versión del plugin: 1.6.2
 #
 # - Soporte para LuckPerms.
 # - Soporte para Vault.
@@ -30,14 +30,10 @@ reloading: "&#FFAFFBRecargando..."
 reloaded: "&#84FFB8¡Plugin recargado exitosamente!"
 reload-failed: "&#ff0000¡Error al recargar el plugin!"
 
-# Versión.
-version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/utophii/nonchat/releases/tag/1.6.0\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.6.0"
-
 # Ayuda.
 help: "&#FFAFFBnonchat | comandos:"
 nreload: "&#FFAFFB/nonchat reload&#ffffff - recarga el plugin"
 help-command: "&#FFAFFB/nonchat help&#ffffff - lista de comandos"
-version-command: "&#FFAFFB/nonchat version&#ffffff - mostrar la versión del plugin"
 server-command: "&#FFAFFB/server&#ffffff - información del servidor"
 message-command: "&#FFAFFB/m <jugador> <mensaje>&#ffffff - envía un mensaje privado a un jugador"
 broadcast-command: "&#FFAFFB/bc <mensaje>&#ffffff - envía un mensaje a todo el servidor"

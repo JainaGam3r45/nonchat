@@ -132,21 +132,21 @@ public class PluginConfig {
         config.set("quit-messages.enabled", true);
         config.set("quit-messages.format", "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
         
-        // Private chat settings (оставляем как есть)
         // Private chat configuration
-        config.set("private-chat.sender-format", "§7[§aTo §f{target}§7] §7{message}");
-        config.set("private-chat.receiver-format", "§7[§cFrom §f{sender}§7] §7{message}");
-        config.set("private-chat.hover.enabled", true);
-        config.set("private-chat.hover.sender-hover", Arrays.asList(
-            "§7Sent to: §f{target}",
-            "§7Time: §f{time}",
-            "§7Click to send another message"
+        config.set("private-chat.sender.format", "§8[§fYou §8-> §f{receiver}§8] §f{message}");
+        config.set("private-chat.sender.hover.enabled", true);
+        config.set("private-chat.sender.hover.text", Arrays.asList(
+            "§7Sent to §f{receiver}",
+            "§8Click to reply"
         ));
-        config.set("private-chat.hover.receiver-hover", Arrays.asList(
-            "§7From: §f{sender}",
-            "§7Time: §f{time}",
-            "§7Click to reply"
+        config.set("private-chat.receiver.format", "§8[§f{sender} §f-> §fYou§8] §f{message}");
+        config.set("private-chat.receiver.hover.enabled", true);
+        config.set("private-chat.receiver.hover.text", Arrays.asList(
+            "§7From §f{sender}",
+            "§8Click to reply"
         ));
+        config.set("private-chat.click-actions.enabled", true);
+        config.set("private-chat.click-actions.reply-command", "/msg {sender} ");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
         // Chat bubbles configuration
@@ -251,6 +251,7 @@ public class PluginConfig {
         config.set("channels.global.cooldown", 0);
         config.set("channels.global.min-length", 0);
         config.set("channels.global.max-length", -1);
+        config.set("channels.global.switch-message", "");
 
         // Configure local chat channel
         config.set("channels.local.enabled", true);
@@ -263,6 +264,7 @@ public class PluginConfig {
         config.set("channels.local.cooldown", 0);
         config.set("channels.local.min-length", 0);
         config.set("channels.local.max-length", -1);
+        config.set("channels.local.switch-message", "");
         
         // Configure staff chat channel
         config.set("channels.staff.enabled", true);
@@ -275,6 +277,7 @@ public class PluginConfig {
         config.set("channels.staff.cooldown", 0);
         config.set("channels.staff.min-length", 0);
         config.set("channels.staff.max-length", -1);
+        config.set("channels.staff.switch-message", "");
     }
 
     /**
@@ -625,7 +628,11 @@ public class PluginConfig {
      * @return true if sender hover text is enabled
      */
     public boolean isPrivateChatSenderHoverEnabled() {
-        return config.getBoolean("private-chat.sender.hover.enabled", true);
+        if (config.contains("private-chat.sender.hover.enabled")) {
+            return config.getBoolean("private-chat.sender.hover.enabled", true);
+        }
+        // Legacy fallback
+        return config.getBoolean("private-chat.hover.enabled", true);
     }
 
     /**
@@ -633,7 +640,11 @@ public class PluginConfig {
      * @return true if receiver hover text is enabled
      */
     public boolean isPrivateChatReceiverHoverEnabled() {
-        return config.getBoolean("private-chat.receiver.hover.enabled", true);
+        if (config.contains("private-chat.receiver.hover.enabled")) {
+            return config.getBoolean("private-chat.receiver.hover.enabled", true);
+        }
+        // Legacy fallback
+        return config.getBoolean("private-chat.hover.enabled", true);
     }
 
     /**
@@ -642,7 +653,12 @@ public class PluginConfig {
      */
     @NotNull
     public List<String> getPrivateChatSenderHover() {
-        return config.getStringList("private-chat.sender.hover.text");
+        List<String> hover = config.getStringList("private-chat.sender.hover.text");
+        if (hover.isEmpty()) {
+            // Legacy fallback
+            hover = config.getStringList("private-chat.hover.sender-hover");
+        }
+        return hover;
     }
 
     /**
@@ -651,7 +667,12 @@ public class PluginConfig {
      */
     @NotNull
     public List<String> getPrivateChatReceiverHover() {
-        return config.getStringList("private-chat.receiver.hover.text");
+        List<String> hover = config.getStringList("private-chat.receiver.hover.text");
+        if (hover.isEmpty()) {
+            // Legacy fallback
+            hover = config.getStringList("private-chat.hover.receiver-hover");
+        }
+        return hover;
     }
 
     /**
@@ -964,6 +985,7 @@ public class PluginConfig {
                     int cooldown = channelSection.getInt("cooldown", 0);
                     int minLength = channelSection.getInt("min-length", 0);
                     int maxLength = channelSection.getInt("max-length", -1);
+                    String switchMessage = channelSection.getString("switch-message");
                     
                     channels.put(key, new ChatTypeUtil(
                         enabled,
@@ -975,7 +997,8 @@ public class PluginConfig {
                         receivePermission,
                         cooldown,
                         minLength,
-                        maxLength
+                        maxLength,
+                        switchMessage
                     ));
                 }
             }

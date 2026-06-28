@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -11,8 +11,8 @@
     <version>1.6.2</version>
   </parent>
 
-  <artifactId>nonchat-v1_17_R1</artifactId>
-  <name>nonchat — Adapter 1.17.x</name>
+  <artifactId>nonchat-v26_2_R1</artifactId>
+  <name>nonchat — Adapter 26.2.x</name>
 
   <dependencies>
     <dependency>
@@ -21,9 +21,16 @@
     </dependency>
 
     <dependency>
+      <groupId>com.nonxedy.nonchat</groupId>
+      <artifactId>nonchat-v1_19_R3</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- Paper API 26.2.x -->
+    <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.17.1-R0.1-SNAPSHOT</version>
+      <version>[26.2.build,)</version>
       <scope>provided</scope>
     </dependency>
 
@@ -40,8 +47,6 @@
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
     </plugins>
-
-    <!-- Registering adapter for ServiceLoader -->
     <resources>
       <resource>
         <directory>src/main/resources</directory>

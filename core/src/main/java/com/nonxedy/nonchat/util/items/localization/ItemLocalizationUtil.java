@@ -7,7 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
-import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.debugging.Debugger;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -20,6 +20,12 @@ import net.kyori.adventure.translation.Translator;
  * Uses Paper's GlobalTranslator API for server-side translation
  */
 public class ItemLocalizationUtil {
+    
+    private static Debugger debugger;
+    
+    public static void setDebugger(Debugger debugger) {
+        ItemLocalizationUtil.debugger = debugger;
+    }
     
     /**
      * Gets the localized name of a material using Minecraft's translation keys
@@ -89,7 +95,7 @@ public class ItemLocalizationUtil {
         
         // Check if item has custom display name - use that instead of translating
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            return ColorUtil.parseComponent(item.getItemMeta().getDisplayName());
+            return item.getItemMeta().displayName();
         }
         
         // Get the translation key for this item
@@ -112,7 +118,9 @@ public class ItemLocalizationUtil {
                     return translated;
                 }
             } catch (Exception e) {
-                // Fallback to translatable component if translation fails
+                if (debugger != null) {
+                    debugger.error("ItemLocalization", "Failed to translate item with key '" + translationKey + "' for locale '" + locale + "': " + e.getMessage(), e);
+                }
             }
         }
         
@@ -133,7 +141,8 @@ public class ItemLocalizationUtil {
         
         // Check if item has custom display name
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            return ColorUtil.stripFormatting(item.getItemMeta().getDisplayName());
+            return PlainTextComponentSerializer.plainText()
+                    .serialize(item.getItemMeta().displayName());
         }
         
         // Get the translation key for this item
@@ -151,7 +160,9 @@ public class ItemLocalizationUtil {
                     return PlainTextComponentSerializer.plainText().serialize(translated);
                 }
             } catch (Exception e) {
-                // TODO: add logger
+                if (debugger != null) {
+                    debugger.error("ItemLocalization", "Failed to get translated item name for key '" + translationKey + "' and locale '" + locale + "': " + e.getMessage(), e);
+                }
             }
         }
         
@@ -171,6 +182,9 @@ public class ItemLocalizationUtil {
             Translator translator = GlobalTranslator.translator();
             
             if (translator == null) {
+                if (debugger != null) {
+                    debugger.warn("ItemLocalization", "GlobalTranslator is null, cannot translate key: " + key);
+                }
                 return null;
             }
             
@@ -191,7 +205,10 @@ public class ItemLocalizationUtil {
             
             return null;
         } catch (Exception e) {
-            return null; // TODO: add logger
+            if (debugger != null) {
+                debugger.error("ItemLocalization", "Failed to translate key '" + key + "' with locale '" + locale + "': " + e.getMessage(), e);
+            }
+            return null;
         }
     }
     

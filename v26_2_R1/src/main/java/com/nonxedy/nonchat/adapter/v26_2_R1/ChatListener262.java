@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.adapter.v26_1_R1;
+package com.nonxedy.nonchat.adapter.v26_2_R1;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -9,11 +9,11 @@ import com.nonxedy.nonchat.api.IMessageHandler;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
-public final class ChatListener261 implements Listener {
+public final class ChatListener262 implements Listener {
     private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();
     private final IMessageHandler handler;
 
-    public ChatListener261(IMessageHandler handler) {
+    public ChatListener262(IMessageHandler handler) {
         this.handler = handler;
     }
 

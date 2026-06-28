@@ -34,9 +34,10 @@ import com.nonxedy.nonchat.service.DeathMessageService;
 import com.nonxedy.nonchat.util.InteractivePlaceholderManager;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
+import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
-import com.nonxedy.nonchat.util.core.messages.MessageUtil;
+import com.nonxedy.nonchat.util.items.localization.ItemLocalizationUtil;
 
 import dev.faststats.bukkit.BukkitMetrics;
 import dev.faststats.core.ErrorTracker;
@@ -138,6 +139,9 @@ public class Nonchat extends JavaPlugin {
             if (configService.getConfig().isDebug()) {
                 this.debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
                 debugger.info("Core", "Debug system initialized");
+                
+                // Initialize debugger
+                ItemLocalizationUtil.setDebugger(debugger);
             }
             
             // Initialize death message service with independent configuration
@@ -469,8 +473,11 @@ public class Nonchat extends JavaPlugin {
                 if (debugger == null) {
                     debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
                 }
+                // Update debugger
+                ItemLocalizationUtil.setDebugger(debugger);
             } else {
                 debugger = null;
+                ItemLocalizationUtil.setDebugger(null);
             }
             
             getLogger().info("Services reloaded successfully");

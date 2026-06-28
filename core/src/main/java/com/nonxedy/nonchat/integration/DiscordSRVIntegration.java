@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
+import com.nonxedy.nonchat.chat.channel.ResolvedChannelMessage;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.api.Subscribe;
@@ -34,7 +35,7 @@ public class DiscordSRVIntegration {
         }
 
         ChannelManager channelManager = plugin.getChatManager().getChannelManager();
-        ChannelManager.ResolvedChannelMessage resolvedMessage = channelManager.resolveChannelMessage(message, player);
+        ResolvedChannelMessage resolvedMessage = channelManager.resolveChannelMessage(message, player);
 
         if (resolvedMessage == null) {
             event.setCancelled(true);

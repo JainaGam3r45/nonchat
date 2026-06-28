@@ -230,6 +230,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         int cooldown = 0;
         int minLength = 0;
         int maxLength = 256;
+        String switchMessage = "";
         
         // Process optional parameters
         for (int i = 3; i < args.length; i++) {
@@ -302,7 +303,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         Channel channel = chatManager.getChannelManager().createChannel(
             channelId, displayName, format, prefix, 
             sendPermission, receivePermission, radius,
-            cooldown, minLength, maxLength
+            cooldown, minLength, maxLength, switchMessage
         );
         
         
@@ -349,7 +350,8 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         Integer cooldown = null;
         Integer minLength = null;
         Integer maxLength = null;
-        
+        String switchMessage = null;
+
         for (int i = 2; i < args.length; i++) {
             String arg = args[i];
             if (arg.startsWith("display:")) {
@@ -424,7 +426,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         boolean success = chatManager.getChannelManager().updateChannel(
             channelId, displayName, format, prefix,
             sendPermission, receivePermission, radius, enabled,
-            cooldown, minLength, maxLength
+            cooldown, minLength, maxLength, switchMessage
         );
         
         if (success) {

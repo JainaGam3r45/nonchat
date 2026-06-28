@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
@@ -60,9 +59,6 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             }
             case "help" -> {
                 return handleHelpCommand(sender);
-            }
-            case "version" -> {
-                return handleVersionCommand(sender);
             }
             default -> {
                 sendHelpMessage(sender);
@@ -133,22 +129,6 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Handles the version subcommand
-     */
-    private boolean handleVersionCommand(CommandSender sender) {
-        // Check if sender has permission
-        if (!sender.hasPermission("nonchat.version")) {
-            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
-            plugin.logError("No permission for /nonchat version command: " + sender.getName());
-            return true;
-        }
-
-        // Send the version message
-        sendVersionMessage(sender);
-        return true;
-    }
-
-    /**
      * Sends the formatted help message to the sender
      */
     private void sendHelpMessage(CommandSender sender) {
@@ -167,24 +147,6 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Sends the version message to the sender
-     */
-    private void sendVersionMessage(CommandSender sender) {
-        try {
-            // Get plugin version from plugin.yml
-            String version = plugin.getDescription().getVersion();
-            // Replace placeholder in version message
-            String versionMessage = messages.getString("version").replace("{version}", version);
-            // Make links clickable in the version message
-            Component versionComponent = LinkDetector.makeLinksClickable(versionMessage);
-            MessageUtil.send(sender, versionComponent);
-            plugin.logResponse("Version message sent successfully");
-        } catch (Exception e) {
-            plugin.logError("Failed to send version message: " + e.getMessage());
-        }
-    }
-
-    /**
      * Builds list of available commands
      */
     private Component getCommandsList() {
@@ -195,9 +157,6 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             .append(Component.newline())
             // Add help command description
             .append(ColorUtil.parseComponentCached(messages.getString("help-command")))
-            .append(Component.newline())
-            // Add version command description
-            .append(ColorUtil.parseComponentCached(messages.getString("version-command")))
             .append(Component.newline())
             // Add server command description
             .append(ColorUtil.parseComponentCached(messages.getString("server-command")))
@@ -244,11 +203,6 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             // Add help subcommand if they have permission
             if (sender.hasPermission("nonchat.help")) {
                 subCommands.add("help");
-            }
-
-            // Add version subcommand if they have permission
-            if (sender.hasPermission("nonchat.version")) {
-                subCommands.add("version");
             }
 
             return filterStartingWith(args[0], subCommands);
