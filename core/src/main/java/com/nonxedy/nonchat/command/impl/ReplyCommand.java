@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.core.MessageManager;
+import com.nonxedy.nonchat.util.chat.MentionCompletionUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
@@ -61,6 +62,13 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("nonchat.reply")) {
             return Collections.emptyList();
+        }
+
+        if (args.length > 0) {
+            List<String> mentionSuggestions = MentionCompletionUtil.getMentionSuggestions(sender, args[args.length - 1]);
+            if (!mentionSuggestions.isEmpty()) {
+                return mentionSuggestions;
+            }
         }
 
         if (args.length == 1) {

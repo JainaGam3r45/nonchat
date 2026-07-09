@@ -21,6 +21,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.util.chat.MentionCompletionUtil;
 import com.nonxedy.nonchat.util.chat.formatting.PrivateMessageUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.core.messages.MessageUtil;
@@ -289,13 +290,20 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
                     .collect(Collectors.toList());
         }
     
-        if (args.length == 2) {
-            List<String> suggestions = Arrays.asList(
-                "message"
-            );
-            return suggestions.stream()
-                    .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
-                    .collect(Collectors.toList());
+        if (args.length >= 2) {
+            List<String> mentionSuggestions = MentionCompletionUtil.getMentionSuggestions(sender, args[args.length - 1]);
+            if (!mentionSuggestions.isEmpty()) {
+                return mentionSuggestions;
+            }
+
+            if (args.length == 2) {
+                List<String> suggestions = Arrays.asList(
+                    "message"
+                );
+                return suggestions.stream()
+                        .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
         }
     
         return Collections.emptyList();
