@@ -261,9 +261,9 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Add last message sender to the map
-        if (sender instanceof Player player) {
-            plugin.getMessageManager().getLastMessageSender().put(target.getUniqueId(), player.getUniqueId());
+        // Update both players' reply targets so /reply follows the active private conversation.
+        if (plugin != null && sender instanceof Player player) {
+            plugin.getMessageManager().updateReplyTargets(player, target);
         }
     }
 
