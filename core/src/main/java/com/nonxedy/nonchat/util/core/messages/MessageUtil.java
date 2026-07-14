@@ -1,14 +1,17 @@
 package com.nonxedy.nonchat.util.core.messages;
 
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 /**
  * Sends Adventure components natively.
@@ -16,7 +19,28 @@ import net.kyori.adventure.text.Component;
  */
 public final class MessageUtil {
 
+    private static Method joinMessageMethod;
+    private static Method quitMessageMethod;
+    private static boolean reflectionInitialized = false;
+
     private MessageUtil() {
+    }
+
+    private static void initReflection() {
+        if (reflectionInitialized) {
+            return;
+        }
+        try {
+            joinMessageMethod = PlayerJoinEvent.class.getMethod("joinMessage", Component.class);
+        } catch (NoSuchMethodException e) {
+            // Paper joinMessage(Component) is not available, will fall back to setJoinMessage(String)
+        }
+        try {
+            quitMessageMethod = PlayerQuitEvent.class.getMethod("quitMessage", Component.class);
+        } catch (NoSuchMethodException e) {
+            // Paper quitMessage(Component) is not available, will fall back to setQuitMessage(String)
+        }
+        reflectionInitialized = true;
     }
 
     public static void send(@NotNull CommandSender sender, @NotNull Component message) {
@@ -34,20 +58,43 @@ public final class MessageUtil {
     }
 
     public static void joinMessage(@NotNull PlayerJoinEvent event, @NotNull Component message) {
-        // For join/quit we still need legacy string because Bukkit event API
-        // Join/Quit events don't support Adventure components directly in all versions
-        if (event.getPlayer() instanceof Player player) {
-            player.sendMessage(message);
+        initReflection();
+        if (joinMessageMethod != null) {
+            try {
+                joinMessageMethod.invoke(event, message);
+                return;
+            } catch (Exception e) {
+                Bukkit.getLogger().log(Level.WARNING, "Error calling joinMessage(Component) via reflection, falling back to legacy", e);
+            }
         }
-        // Fallback for very old API compatibility (rarely used now)
-        event.setJoinMessage(null); // Prevent default, we sent via player.sendMessage
+        
+        // Fallback to legacy String join message (Spigot or older versions)
+        try {
+            String legacyMsg = LegacyComponentSerializer.legacySection().serialize(message);
+            event.setJoinMessage(legacyMsg);
+        } catch (Exception e) {
+            Bukkit.getLogger().log(Level.SEVERE, "Failed to set legacy join message", e);
+        }
     }
 
     public static void quitMessage(@NotNull PlayerQuitEvent event, @NotNull Component message) {
-        if (event.getPlayer() instanceof Player player) {
-            player.sendMessage(message);
+        initReflection();
+        if (quitMessageMethod != null) {
+            try {
+                quitMessageMethod.invoke(event, message);
+                return;
+            } catch (Exception e) {
+                Bukkit.getLogger().log(Level.WARNING, "Error calling quitMessage(Component) via reflection, falling back to legacy", e);
+            }
         }
-        event.setQuitMessage(null);
+        
+        // Fallback to legacy String quit message (Spigot or older versions)
+        try {
+            String legacyMsg = LegacyComponentSerializer.legacySection().serialize(message);
+            event.setQuitMessage(legacyMsg);
+        } catch (Exception e) {
+            Bukkit.getLogger().log(Level.SEVERE, "Failed to set legacy quit message", e);
+        }
     }
 
     public static void deathMessage(@NotNull PlayerDeathEvent event, Component message) {
