@@ -89,10 +89,9 @@ public class RollCommand implements CommandExecutor, TabCompleter {
             }
 
             int rolledNumber = random.nextInt(maxNumber) + 1;
-            String format = config.getRollFormat()
-                .replace("{number}", String.valueOf(rolledNumber));
+            String format = config.getRollFormat();
 
-            // Process PlaceholderAPI placeholders if available
+            // Parse placeholders ONLY on the format (admin-controlled), NEVER on user input
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 try {
                     format = PlaceholderAPI.setPlaceholders((Player) sender, format);
@@ -100,6 +99,9 @@ public class RollCommand implements CommandExecutor, TabCompleter {
                     plugin.logError("Failed to process PlaceholderAPI placeholders for roll command: " + e.getMessage());
                 }
             }
+
+            // Insert the rolled number (no placeholder parsing on user-controlled parts)
+            format = format.replace("{number}", String.valueOf(rolledNumber));
 
             sender.getServer().broadcast(ColorUtil.parseComponent(format));
             plugin.logResponse("Player " + sender.getName() + " used roll command");

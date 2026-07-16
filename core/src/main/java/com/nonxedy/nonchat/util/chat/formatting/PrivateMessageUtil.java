@@ -4,12 +4,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
-import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -23,14 +24,19 @@ public class PrivateMessageUtil {
         String format = config.getPrivateChatSenderFormat();
         String senderName = sender != null ? sender.getName() : "Console";
 
+        // Parse placeholders ONLY on the format (before inserting user message)
+        if (sender != null && Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                format = PlaceholderAPI.setPlaceholders(sender, format);
+            } catch (Exception e) {
+                // Ignore placeholder errors
+            }
+        }
+
         String formattedMessage = format
                 .replace("{sender}", senderName)
                 .replace("{receiver}", target.getName())
                 .replace("{message}", message);
-
-        if (sender != null) {
-            formattedMessage = IntegrationUtil.processPlaceholders(sender, formattedMessage);
-        }
 
         Component baseComponent = ColorUtil.parseComponent(formattedMessage);
 
@@ -47,12 +53,20 @@ public class PrivateMessageUtil {
         String format = config.getPrivateChatReceiverFormat();
         String senderName = sender != null ? sender.getName() : "Console";
 
+        // Parse placeholders ONLY on the format (before inserting user message)
+        // Use target for receiver-specific placeholders
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                format = PlaceholderAPI.setPlaceholders(target, format);
+            } catch (Exception e) {
+                // Ignore placeholder errors
+            }
+        }
+
         String formattedMessage = format
                 .replace("{sender}", senderName)
                 .replace("{receiver}", target.getName())
                 .replace("{message}", message);
-
-        formattedMessage = IntegrationUtil.processPlaceholders(target, formattedMessage);
 
         Component baseComponent = ColorUtil.parseComponent(formattedMessage);
 
@@ -113,16 +127,21 @@ public class PrivateMessageUtil {
             String line = hoverLines.get(i);
             String senderName = sender != null ? sender.getName() : "Console";
 
+            // Parse placeholders on hover lines (these are config-controlled)
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                try {
+                    if (sender != null) {
+                        line = PlaceholderAPI.setPlaceholders(sender, line);
+                    } else if (target != null) {
+                        line = PlaceholderAPI.setPlaceholders(target, line);
+                    }
+                } catch (Exception ignored) {}
+            }
+
             line = line
                     .replace("{sender}", senderName)
                     .replace("{receiver}", target.getName())
                     .replace("{time}", currentTime);
-
-            if (sender != null) {
-                line = IntegrationUtil.processPlaceholders(sender, line);
-            } else {
-                line = IntegrationUtil.processPlaceholders(target, line);
-            }
 
             components.add(ColorUtil.parseComponent(line));
 

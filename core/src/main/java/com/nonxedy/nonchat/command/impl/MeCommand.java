@@ -104,17 +104,19 @@ public class MeCommand implements CommandExecutor, TabCompleter {
         }
 
         String message = String.join(" ", args);
-        String formattedMessage = config.getMeFormat()
-            .replace("{message}", message);
+        String format = config.getMeFormat();
 
-        // Process PlaceholderAPI placeholders if available
+        // Parse placeholders ONLY on the format (admin-controlled), NEVER on user message
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
-                formattedMessage = PlaceholderAPI.setPlaceholders((Player) sender, formattedMessage);
+                format = PlaceholderAPI.setPlaceholders((Player) sender, format);
             } catch (Exception e) {
                 plugin.logError("Failed to process PlaceholderAPI placeholders for me command: " + e.getMessage());
             }
         }
+
+        // Insert the raw user message (no placeholder parsing on message content)
+        String formattedMessage = format.replace("{message}", message);
 
         plugin.getServer().broadcast(ColorUtil.parseComponent(formattedMessage));
         plugin.logResponse("Me command executed: " + sender.getName() + " - " + message);
