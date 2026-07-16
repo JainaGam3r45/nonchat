@@ -41,6 +41,8 @@
     <discordsrv.version>1.28.0</discordsrv.version>
     <commonslang.version>3.20.0</commonslang.version>
     <faststats.version>0.22.0</faststats.version>
+    <junit.version>5.11.4</junit.version>
+    <surefire.version>3.5.3</surefire.version>
   </properties>
 
   <repositories>
@@ -142,6 +144,12 @@
         <artifactId>bukkit</artifactId>
         <version>${faststats.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -149,6 +157,11 @@
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>

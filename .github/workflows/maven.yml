@@ -58,7 +58,7 @@ jobs:
           cache: maven
 
       - name: Build plugin reactor
-        run: mvn -B -ntp clean package -DskipTests -pl plugin -am
+        run: mvn -B -ntp clean verify -pl plugin -am
 
       - name: Verify shaded artifact
         run: |
