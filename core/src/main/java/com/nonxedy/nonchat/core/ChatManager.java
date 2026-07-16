@@ -21,7 +21,6 @@ import com.nonxedy.nonchat.chat.channel.ResolvedChannelMessage;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.AsyncFilterService;
 import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.SpamDetector;
@@ -44,7 +43,6 @@ public class ChatManager {
     private IgnoreCommand ignoreCommand;
     private final AdDetector adDetector;
     private final SpamDetector spamDetector;
-    private final AsyncFilterService asyncFilterService;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
@@ -52,13 +50,23 @@ public class ChatManager {
         this.messages = messages;
         this.adDetector = new AdDetector(config, config.getAntiAdSensitivity(), config.getAntiAdPunishCommand());
         this.spamDetector = new SpamDetector(config, messages);
-        this.asyncFilterService = new AsyncFilterService(plugin, adDetector);
         this.channelManager = new ChannelManager(plugin, config);
         this.ignoreCommand = plugin.getIgnoreCommand();
         startBubbleUpdater();
     }
 
+    // Processes a player message on the server thread
     public void processChat(Player player, String messageContent) {
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(plugin, () -> processChat(player, messageContent));
+            return;
+        }
+        // The player may have disconnected before an async chat event reached
+        // the server thread.
+        if (!player.isOnline()) {
+            return;
+        }
+
         // Log incoming message
         plugin.logChatMessage("Incoming: Player=" + player.getName() + " Message=\"" + messageContent + "\"");
 
@@ -169,7 +177,7 @@ public class ChatManager {
 
         // Check advertisements
         if (config.isAntiAdEnabled() && !player.hasPermission("nonchat.ad.bypass")) {
-            if (asyncFilterService.shouldFilterAsync(player, message).join()) {
+            if (adDetector.shouldFilter(player, message)) {
                 MessageUtil.send(player, ColorUtil.parseComponentCached(messages.getString("blocked-words")));
                 return false;
             }
@@ -815,9 +823,6 @@ public class ChatManager {
      * Cleanup method to remove all bubbles when plugin is disabled
      */
     public void cleanup() {
-        if (asyncFilterService != null) {
-            asyncFilterService.shutdown();
-        }
         if (plugin.getPlatformAdapter() != null) {
             bubbles.values().forEach(plugin.getPlatformAdapter()::removeBubbles);
         }
