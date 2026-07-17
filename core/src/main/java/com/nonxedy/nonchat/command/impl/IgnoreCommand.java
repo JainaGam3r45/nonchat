@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.storage.IgnoreStorage;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
@@ -30,11 +31,14 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
     private final PluginMessages messages;
     // Map to store ignored players (key: player UUID, value: set of ignored player UUIDs)
     private final Map<UUID, Set<UUID>> ignoredPlayers = new HashMap<>();
+    private final IgnoreStorage ignoreStorage;
 
     // Constructor to initialize the command
     public IgnoreCommand(Nonchat plugin, PluginMessages messages) {
         this.plugin = plugin;
         this.messages = messages;
+        this.ignoreStorage = new IgnoreStorage(plugin);
+        this.ignoredPlayers.putAll(ignoreStorage.load());
     }
 
     /**
@@ -107,6 +111,10 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
                     .replace("{player}", target.getName())));
             plugin.logResponse("Player ignored: " + target.getName());
         }
+        if (ignored.isEmpty()) {
+            ignoredPlayers.remove(player.getUniqueId());
+        }
+        saveIgnoreLists();
 
         return true;
     }
@@ -144,7 +152,8 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
      * @return Set of UUIDs representing ignored players
      */
     public Set<UUID> getIgnoredPlayers(Player player) {
-        return ignoredPlayers.getOrDefault(player.getUniqueId(), new HashSet<>());
+        Set<UUID> ignored = ignoredPlayers.get(player.getUniqueId());
+        return ignored == null ? Collections.emptySet() : Set.copyOf(ignored);
     }
     
     /**
@@ -162,6 +171,14 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
      * @param player The player whose ignore list to clear
      */
     public void clearIgnoreList(Player player) {
-        ignoredPlayers.remove(player.getUniqueId());
+        if (ignoredPlayers.remove(player.getUniqueId()) != null) {
+            saveIgnoreLists();
+        }
+    }
+
+    private void saveIgnoreLists() {
+        Map<UUID, Set<UUID>> snapshot = new HashMap<>();
+        ignoredPlayers.forEach((owner, ignored) -> snapshot.put(owner, new HashSet<>(ignored)));
+        ignoreStorage.save(snapshot);
     }
 }
