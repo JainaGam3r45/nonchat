@@ -38,6 +38,32 @@ public class MessageManager {
         return lastMessageSender;
     }
 
+    /**
+     * Updates the reply target for one player.
+     *
+     * @param player player whose /reply target should be updated
+     * @param target player that /reply should message
+     */
+    public void setReplyTarget(Player player, Player target) {
+        if (player == null || target == null) {
+            return;
+        }
+
+        lastMessageSender.put(player.getUniqueId(), target.getUniqueId());
+    }
+
+    /**
+     * Updates both sides of a private conversation so /reply works for the
+     * sender and the receiver after either /msg or /reply is used.
+     *
+     * @param sender message sender
+     * @param receiver message receiver
+     */
+    public void updateReplyTargets(Player sender, Player receiver) {
+        setReplyTarget(sender, receiver);
+        setReplyTarget(receiver, sender);
+    }
+
     public void sendPrivateMessage(Player sender, Player receiver, String message) {
         if (ignoreCommand != null && ignoreCommand.isIgnoring(receiver, sender)) {
             MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
@@ -59,7 +85,7 @@ public class MessageManager {
             return;
         }
 
-        lastMessageSender.put(receiver.getUniqueId(), sender.getUniqueId());
+        updateReplyTargets(sender, receiver);
 
         // Process message with color permission for sender
         String processedMessage = sender.hasPermission("nonchat.color") ? message : ColorUtil.stripAllColors(message);

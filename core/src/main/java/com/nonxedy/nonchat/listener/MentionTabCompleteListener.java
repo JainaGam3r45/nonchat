@@ -1,10 +1,8 @@
 package com.nonxedy.nonchat.listener;
 
-import java.util.ArrayList;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
-import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -12,12 +10,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 
 import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
+import com.nonxedy.nonchat.util.chat.MentionCompletionUtil;
 
 public class MentionTabCompleteListener implements Listener {
 
@@ -49,7 +48,7 @@ public class MentionTabCompleteListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerChatTabComplete(PlayerChatTabCompleteEvent event) {
         String lastToken = event.getLastToken();
-        List<String> suggestions = getMentionSuggestions(event.getPlayer(), lastToken);
+        List<String> suggestions = MentionCompletionUtil.getMentionSuggestions(event.getPlayer(), lastToken);
         if (suggestions.isEmpty()) {
             return;
         }
@@ -64,7 +63,7 @@ public class MentionTabCompleteListener implements Listener {
             return;
         }
 
-        List<String> suggestions = getMentionSuggestions(player, extractLastToken(event.getBuffer()));
+        List<String> suggestions = MentionCompletionUtil.getMentionSuggestions(player, MentionCompletionUtil.extractLastToken(event.getBuffer()));
         if (suggestions.isEmpty()) {
             return;
         }
@@ -79,48 +78,12 @@ public class MentionTabCompleteListener implements Listener {
             return;
         }
 
-        List<String> suggestions = getMentionSuggestions(player, extractLastToken(event.getBuffer()));
+        List<String> suggestions = MentionCompletionUtil.getMentionSuggestions(player, MentionCompletionUtil.extractLastToken(event.getBuffer()));
         if (suggestions.isEmpty()) {
             return;
         }
 
         event.setCompletions(suggestions);
-    }
-
-    private List<String> getMentionSuggestions(Player sender, String lastToken) {
-        if (lastToken == null || !lastToken.startsWith("@")) {
-            return List.of();
-        }
-
-        String partialName = lastToken.substring(1).toLowerCase(Locale.ROOT);
-        return getOnlinePlayerMentions(sender, partialName);
-    }
-
-    private String extractLastToken(String buffer) {
-        if (buffer == null || buffer.isEmpty()) {
-            return "";
-        }
-
-        int lastSpace = buffer.lastIndexOf(' ');
-        return lastSpace >= 0 ? buffer.substring(lastSpace + 1) : buffer;
-    }
-
-    private List<String> getOnlinePlayerMentions(Player sender, String partialName) {
-        List<String> suggestions = new ArrayList<>();
-
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (!sender.canSee(onlinePlayer)) {
-                continue;
-            }
-
-            if (!onlinePlayer.getName().toLowerCase(Locale.ROOT).startsWith(partialName)) {
-                continue;
-            }
-
-            suggestions.add("@" + onlinePlayer.getName());
-        }
-
-        return suggestions;
     }
 
     private void refreshPlayerCompletions(Player player) {

@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.nonxedy.nonchat</groupId>
     <artifactId>nonchat-parent</artifactId>
-    <version>1.6.2</version>
+    <version>1.6.3</version>
   </parent>
 
   <artifactId>nonchat-v26_1_R1</artifactId>
