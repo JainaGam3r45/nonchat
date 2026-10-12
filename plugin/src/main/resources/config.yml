@@ -337,8 +337,12 @@ private-chat:
   click-actions:
     # Enable/disable click-to-reply functionality on private messages.
     enabled: true
-    # Command executed when clicking to reply. Use {sender} as a placeholder.
-    reply-command: "/msg {sender} "
+    # Command executed when clicking to reply on the receiver's message.
+    # Use {sender} for the player who sent the message and {receiver} for the recipient.
+    receiver-reply-command: "/msg {sender} "
+    # Command executed when clicking to reply on the sender's own message.
+    # Defaults to targeting the receiver so the sender replies to the right person.
+    sender-reply-command: "/msg {receiver} "
 
   # Sound to play when a private message is received. Leave empty to disable.
   sound: ""

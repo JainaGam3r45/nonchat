@@ -87,7 +87,7 @@ public class PrivateMessageUtil {
         Component resultComponent = component.hoverEvent(HoverEvent.showText(hoverComponent));
 
         if (config.isPrivateChatClickActionsEnabled()) {
-            String clickCommand = config.getPrivateChatReplyCommand()
+            String clickCommand = config.getPrivateChatSenderReplyCommand()
                     .replace("{sender}", sender != null ? sender.getName() : "Console")
                     .replace("{receiver}", target.getName());
             resultComponent = resultComponent.clickEvent(ClickEvent.suggestCommand(clickCommand));
@@ -106,7 +106,7 @@ public class PrivateMessageUtil {
         Component resultComponent = component.hoverEvent(HoverEvent.showText(hoverComponent));
 
         if (config.isPrivateChatClickActionsEnabled()) {
-            String clickCommand = config.getPrivateChatReplyCommand()
+            String clickCommand = config.getPrivateChatReceiverReplyCommand()
                     .replace("{sender}", sender != null ? sender.getName() : "Console")
                     .replace("{receiver}", target.getName());
             resultComponent = resultComponent.clickEvent(ClickEvent.suggestCommand(clickCommand));

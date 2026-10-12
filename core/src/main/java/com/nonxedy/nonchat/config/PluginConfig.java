@@ -160,7 +160,8 @@ public class PluginConfig {
             "§8Click to reply"
         ));
         config.set("private-chat.click-actions.enabled", true);
-        config.set("private-chat.click-actions.reply-command", "/msg {sender} ");
+        config.set("private-chat.click-actions.receiver-reply-command", "/msg {sender} ");
+        config.set("private-chat.click-actions.sender-reply-command", "/msg {receiver} ");
         config.set("private-chat.sound", "");
         config.set("private-chat.sound-volume", 1.0);
         config.set("private-chat.sound-pitch", 1.0);
@@ -768,12 +769,25 @@ public class PluginConfig {
     }
 
     /**
-     * Gets private chat default reply command
+     * Gets the reply command for the receiver's private message.
+     * When the receiver clicks the message, this command is inserted.
+     * Defaults to /msg {sender} so the receiver replies to the sender.
      * @return Reply command template
      */
     @NotNull
-    public String getPrivateChatReplyCommand() {
-        return config.getString("private-chat.click-actions.reply-command", "/msg {sender} ");
+    public String getPrivateChatReceiverReplyCommand() {
+        return config.getString("private-chat.click-actions.receiver-reply-command", "/msg {sender} ");
+    }
+
+    /**
+     * Gets the reply command for the sender's own private message.
+     * When the sender clicks their own message, this command is inserted.
+     * Defaults to /msg {receiver} so the sender replies to the receiver.
+     * @return Reply command template
+     */
+    @NotNull
+    public String getPrivateChatSenderReplyCommand() {
+        return config.getString("private-chat.click-actions.sender-reply-command", "/msg {receiver} ");
     }
 
     /**
