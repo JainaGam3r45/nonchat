@@ -1,5 +1,6 @@
 package com.nonxedy.nonchat.util.chat.filters;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
@@ -35,6 +36,7 @@ public class WordBlocker implements MessageFilter {
     private final Supplier<List<String>> bannedPatterns;
     private final BooleanSupplier wholeWords;
     private final Supplier<List<String>> exceptions;
+    private volatile CompiledRules compiledRules;
 
     /**
      * Creates a fully-featured word blocker that executes configured actions on detection.
@@ -135,33 +137,48 @@ public class WordBlocker implements MessageFilter {
         }
 
         String lowerMessage = removeExceptions(sanitized.toLowerCase());
-        boolean matchWholeWords = wholeWords.getAsBoolean();
+        CompiledRules rules = currentRules();
 
         // Check banned words (case-insensitive)
-        for (String word : bannedWords.get()) {
-            if (word.isEmpty()) {
-                continue;
+        if (rules.wholeWords()) {
+            for (Pattern word : rules.wordPatterns()) {
+                if (word.matcher(lowerMessage).find()) {
+                    return false;
+                }
             }
-            String lowerWord = word.toLowerCase();
-            if (matchWholeWords ? containsWholeWord(lowerMessage, lowerWord) : lowerMessage.contains(lowerWord)) {
-                return false;
+        } else {
+            for (String word : rules.lowerWords()) {
+                if (lowerMessage.contains(word)) {
+                    return false;
+                }
             }
         }
 
         // Check regex patterns (case-insensitive)
-        for (String pattern : bannedPatterns.get()) {
-            try {
-                Pattern regex = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-                if (regex.matcher(sanitized).find()) {
-                    return false;
-                }
-            } catch (PatternSyntaxException e) {
-                // Log invalid regex pattern but don't crash
-                System.err.println("Invalid regex pattern in banned patterns: " + pattern);
+        for (Pattern regex : rules.patterns()) {
+            if (regex.matcher(sanitized).find()) {
+                return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Returns compiled rules for the current configuration, recompiling only when it has changed
+     * @return Compiled banned words and patterns
+     */
+    private CompiledRules currentRules() {
+        List<String> words = bannedWords.get();
+        List<String> patterns = bannedPatterns.get();
+        boolean matchWholeWords = wholeWords.getAsBoolean();
+
+        CompiledRules rules = compiledRules;
+        if (rules == null || !rules.matches(words, patterns, matchWholeWords)) {
+            rules = CompiledRules.compile(words, patterns, matchWholeWords);
+            compiledRules = rules;
+        }
+        return rules;
     }
 
     /**
@@ -180,12 +197,47 @@ public class WordBlocker implements MessageFilter {
         return result;
     }
 
-    private static boolean containsWholeWord(String lowerMessage, String lowerWord) {
-        return wholeWordPattern(lowerWord).matcher(lowerMessage).find();
-    }
-
     // \b only treats ASCII as word characters, so Cyrillic words need explicit Unicode boundaries
     private static Pattern wholeWordPattern(String word) {
         return Pattern.compile("(?<![\\p{L}\\p{N}_])" + Pattern.quote(word) + "(?![\\p{L}\\p{N}_])");
+    }
+
+    /**
+     * Immutable snapshot of the configured lists together with their compiled forms
+     */
+    private record CompiledRules(List<String> sourceWords, List<String> sourcePatterns, boolean wholeWords,
+                                 List<String> lowerWords, List<Pattern> wordPatterns, List<Pattern> patterns) {
+
+        static CompiledRules compile(List<String> words, List<String> patterns, boolean wholeWords) {
+            List<String> lowerWords = new ArrayList<>();
+            List<Pattern> wordPatterns = new ArrayList<>();
+            for (String word : words) {
+                if (word.isEmpty()) {
+                    continue;
+                }
+                String lowerWord = word.toLowerCase();
+                lowerWords.add(lowerWord);
+                if (wholeWords) {
+                    wordPatterns.add(wholeWordPattern(lowerWord));
+                }
+            }
+
+            List<Pattern> compiledPatterns = new ArrayList<>();
+            for (String pattern : patterns) {
+                try {
+                    compiledPatterns.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
+                } catch (PatternSyntaxException e) {
+                    // Log invalid regex pattern
+                    System.err.println("Invalid regex pattern in banned patterns: " + pattern);
+                }
+            }
+
+            return new CompiledRules(List.copyOf(words), List.copyOf(patterns), wholeWords,
+                    List.copyOf(lowerWords), List.copyOf(wordPatterns), List.copyOf(compiledPatterns));
+        }
+
+        boolean matches(List<String> words, List<String> patterns, boolean wholeWords) {
+            return this.wholeWords == wholeWords && sourceWords.equals(words) && sourcePatterns.equals(patterns);
+        }
     }
 }

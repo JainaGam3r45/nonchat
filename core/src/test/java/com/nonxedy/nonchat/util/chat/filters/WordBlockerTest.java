@@ -2,6 +2,7 @@ package com.nonxedy.nonchat.util.chat.filters;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -47,5 +48,15 @@ class WordBlockerTest {
         assertTrue(blocker.isMessageAllowed("First CLASSES today"));
         assertFalse(blocker.isMessageAllowed("class ass"));
         assertFalse(blocker.isMessageAllowed("classass"));
+    }
+
+    @Test
+    void picksUpChangedListsWithoutRecreatingBlocker() {
+        List<String> words = new ArrayList<>(List.of("spam"));
+        WordBlocker blocker = new WordBlocker(words, List.of());
+
+        assertTrue(blocker.isMessageAllowed("hello"));
+        words.add("hello");
+        assertFalse(blocker.isMessageAllowed("hello"));
     }
 }
