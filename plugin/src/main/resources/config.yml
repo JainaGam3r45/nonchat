@@ -486,6 +486,14 @@ banned-words:
     - "anotherbadword"
     - "плохой"
 
+  # If true, banned words match only as whole words ("ass" won't match "class").
+  # If false, they match anywhere inside a word.
+  whole-words: false
+
+  # Words that are allowed even though they contain a banned word, e.g. "class" for "ass".
+  # Matched as substrings, case-insensitive. Applies to 'words' only, not to 'patterns'.
+  exceptions: []
+
   # List of regex patterns for advanced filtering (case-insensitive).
   # Examples:
   #   - '.*\btest\b.*' - matches any message containing the word "test"

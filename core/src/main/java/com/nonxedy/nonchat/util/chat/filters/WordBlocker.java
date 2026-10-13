@@ -1,6 +1,7 @@
 package com.nonxedy.nonchat.util.chat.filters;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -32,6 +33,8 @@ public class WordBlocker implements MessageFilter {
     private final PluginMessages messages;
     private final Supplier<List<String>> bannedWords;
     private final Supplier<List<String>> bannedPatterns;
+    private final BooleanSupplier wholeWords;
+    private final Supplier<List<String>> exceptions;
 
     /**
      * Creates a fully-featured word blocker that executes configured actions on detection.
@@ -43,6 +46,8 @@ public class WordBlocker implements MessageFilter {
         this.messages = messages;
         this.bannedWords = config::getBannedWords;
         this.bannedPatterns = config::getBannedPatterns;
+        this.wholeWords = config::isBannedWordsWholeWords;
+        this.exceptions = config::getBannedWordsExceptions;
     }
 
     /**
@@ -51,10 +56,24 @@ public class WordBlocker implements MessageFilter {
      * @param bannedPatterns List of banned regex patterns
      */
     public WordBlocker(List<String> bannedWords, List<String> bannedPatterns) {
+        this(bannedWords, bannedPatterns, false, List.of());
+    }
+
+    /**
+     * Creates a matcher-only word blocker without action handling (used in unit tests).
+     * @param bannedWords List of banned words
+     * @param bannedPatterns List of banned regex patterns
+     * @param wholeWords Whether banned words match only as whole words
+     * @param exceptions Words allowed even though they contain a banned word
+     */
+    public WordBlocker(List<String> bannedWords, List<String> bannedPatterns,
+                       boolean wholeWords, List<String> exceptions) {
         this.config = null;
         this.messages = null;
         this.bannedWords = () -> bannedWords;
         this.bannedPatterns = () -> bannedPatterns;
+        this.wholeWords = () -> wholeWords;
+        this.exceptions = () -> exceptions;
     }
 
     /**
@@ -115,11 +134,16 @@ public class WordBlocker implements MessageFilter {
             return true;
         }
 
-        String lowerMessage = sanitized.toLowerCase();
+        String lowerMessage = removeExceptions(sanitized.toLowerCase());
+        boolean matchWholeWords = wholeWords.getAsBoolean();
 
         // Check banned words (case-insensitive)
         for (String word : bannedWords.get()) {
-            if (lowerMessage.contains(word.toLowerCase())) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            String lowerWord = word.toLowerCase();
+            if (matchWholeWords ? containsWholeWord(lowerMessage, lowerWord) : lowerMessage.contains(lowerWord)) {
                 return false;
             }
         }
@@ -138,5 +162,30 @@ public class WordBlocker implements MessageFilter {
         }
 
         return true;
+    }
+
+    /**
+     * Removes exception words so banned words inside them are not matched.
+     * Text around an exception is still checked, e.g. "classass" with exception "class" is blocked.
+     * @param lowerMessage Lowercased message
+     * @return Message with exception words replaced by spaces
+     */
+    private String removeExceptions(String lowerMessage) {
+        String result = lowerMessage;
+        for (String exception : exceptions.get()) {
+            if (!exception.isEmpty()) {
+                result = result.replace(exception.toLowerCase(), " ");
+            }
+        }
+        return result;
+    }
+
+    private static boolean containsWholeWord(String lowerMessage, String lowerWord) {
+        return wholeWordPattern(lowerWord).matcher(lowerMessage).find();
+    }
+
+    // \b only treats ASCII as word characters, so Cyrillic words need explicit Unicode boundaries
+    private static Pattern wholeWordPattern(String word) {
+        return Pattern.compile("(?<![\\p{L}\\p{N}_])" + Pattern.quote(word) + "(?![\\p{L}\\p{N}_])");
     }
 }

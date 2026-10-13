@@ -1088,6 +1088,23 @@ public class PluginConfig {
     }
 
     /**
+     * Checks if banned words should only match whole words
+     * @return true if banned words match only as whole words, false for substring matching
+     */
+    public boolean isBannedWordsWholeWords() {
+        return config.getBoolean("banned-words.whole-words", false);
+    }
+
+    /**
+     * Gets words that are allowed even though they contain a banned word (e.g. "class" for "ass")
+     * @return List of exception words
+     */
+    @NotNull
+    public List<String> getBannedWordsExceptions() {
+        return config.getStringList("banned-words.exceptions");
+    }
+
+    /**
      * Checks if word blocking is enabled
      * @return true if word blocking is enabled
      */

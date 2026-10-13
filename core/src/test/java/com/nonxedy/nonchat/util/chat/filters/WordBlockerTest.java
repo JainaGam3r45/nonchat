@@ -29,4 +29,23 @@ class WordBlockerTest {
 
         assertTrue(blocker.isMessageAllowed("ordinary message"));
     }
+
+    @Test
+    void wholeWordModeIgnoresBannedWordInsideOtherWords() {
+        WordBlocker blocker = new WordBlocker(List.of("ass", "плохой"), List.of(), true, List.of());
+
+        assertTrue(blocker.isMessageAllowed("first class"));
+        assertTrue(blocker.isMessageAllowed("оченьплохой день"));
+        assertFalse(blocker.isMessageAllowed("you ASS!"));
+        assertFalse(blocker.isMessageAllowed("плохой день"));
+    }
+
+    @Test
+    void exceptionsAllowWordsContainingBannedWord() {
+        WordBlocker blocker = new WordBlocker(List.of("ass"), List.of(), false, List.of("class"));
+
+        assertTrue(blocker.isMessageAllowed("First CLASSES today"));
+        assertFalse(blocker.isMessageAllowed("class ass"));
+        assertFalse(blocker.isMessageAllowed("classass"));
+    }
 }
