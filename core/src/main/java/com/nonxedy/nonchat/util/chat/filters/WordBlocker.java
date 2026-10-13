@@ -2,6 +2,7 @@ package com.nonxedy.nonchat.util.chat.filters;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -29,8 +30,8 @@ public class WordBlocker implements MessageFilter {
 
     private final PluginConfig config;
     private final PluginMessages messages;
-    private final List<String> bannedWords;
-    private final List<String> bannedPatterns;
+    private final Supplier<List<String>> bannedWords;
+    private final Supplier<List<String>> bannedPatterns;
 
     /**
      * Creates a fully-featured word blocker that executes configured actions on detection.
@@ -40,8 +41,8 @@ public class WordBlocker implements MessageFilter {
     public WordBlocker(PluginConfig config, PluginMessages messages) {
         this.config = config;
         this.messages = messages;
-        this.bannedWords = config.getBannedWords();
-        this.bannedPatterns = config.getBannedPatterns();
+        this.bannedWords = config::getBannedWords;
+        this.bannedPatterns = config::getBannedPatterns;
     }
 
     /**
@@ -52,8 +53,8 @@ public class WordBlocker implements MessageFilter {
     public WordBlocker(List<String> bannedWords, List<String> bannedPatterns) {
         this.config = null;
         this.messages = null;
-        this.bannedWords = bannedWords;
-        this.bannedPatterns = bannedPatterns;
+        this.bannedWords = () -> bannedWords;
+        this.bannedPatterns = () -> bannedPatterns;
     }
 
     /**
@@ -117,14 +118,14 @@ public class WordBlocker implements MessageFilter {
         String lowerMessage = sanitized.toLowerCase();
 
         // Check banned words (case-insensitive)
-        for (String word : bannedWords) {
+        for (String word : bannedWords.get()) {
             if (lowerMessage.contains(word.toLowerCase())) {
                 return false;
             }
         }
 
         // Check regex patterns (case-insensitive)
-        for (String pattern : bannedPatterns) {
+        for (String pattern : bannedPatterns.get()) {
             try {
                 Pattern regex = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
                 if (regex.matcher(sanitized).find()) {
