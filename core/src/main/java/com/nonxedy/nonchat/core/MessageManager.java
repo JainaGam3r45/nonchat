@@ -91,6 +91,11 @@ public class MessageManager {
      * @param reply    {@code true} when this comes from {@code /reply}
      */
     public void sendPrivateMessage(CommandSender sender, Player receiver, String message, boolean reply) {
+        if (!config.isPrivateChatEnabled()) {
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("command-disabled")));
+            return;
+        }
+
         // Check if receiver is online and available to receive the message
         if (receiver == null || !receiver.isOnline()) {
             // Only show notification if enabled in config

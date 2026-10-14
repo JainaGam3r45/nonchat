@@ -33,6 +33,11 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         plugin.logCommand(command.getName(), args);
 
+        if (!plugin.getConfigService().getConfig().isPrivateChatEnabled()) {
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("command-disabled")));
+            return true;
+        }
+
         if (!(sender instanceof Player)) {
             MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-only")));
             return true;
@@ -60,7 +65,8 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("nonchat.reply")) {
+        if (!plugin.getConfigService().getConfig().isPrivateChatEnabled()
+                || !sender.hasPermission("nonchat.reply")) {
             return Collections.emptyList();
         }
 

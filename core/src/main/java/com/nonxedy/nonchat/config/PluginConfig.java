@@ -147,6 +147,7 @@ public class PluginConfig {
         config.set("quit-messages.format", "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
         
         // Private chat configuration
+        config.set("private-chat.enabled", true);
         config.set("private-chat.sender.format", "§8[§fYou §8-> §f{receiver}§8] §f{message}");
         config.set("private-chat.sender.hover.enabled", true);
         config.set("private-chat.sender.hover.text", Arrays.asList(
@@ -688,6 +689,14 @@ public class PluginConfig {
     public String getMentionMessage() {
         String value = config.getString("mentions.mention-message", DEFAULT_MENTION_MESSAGE);
         return value == null ? "" : value.trim();
+    }
+
+    /**
+     * Checks if private messaging (/msg, /reply) is enabled
+     * @return true if enabled
+     */
+    public boolean isPrivateChatEnabled() {
+        return config.getBoolean("private-chat.enabled", true);
     }
 
     /**

@@ -313,6 +313,8 @@ quit-messages:
 # PRIVATE CHAT (MESSAGES)
 # ==================================================
 private-chat:
+  # Enable/disable private messages (/msg, /reply).
+  enabled: true
   sender:
     # Format for the message seen by the sender.
     format: "§8[§fYou §8-> §f{receiver}§8] §f{message}"

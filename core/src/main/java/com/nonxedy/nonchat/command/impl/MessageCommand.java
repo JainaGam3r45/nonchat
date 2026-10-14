@@ -103,6 +103,11 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
             return false;
         }
 
+        if (!config.isPrivateChatEnabled()) {
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("command-disabled")));
+            return true;
+        }
+
         // Check if sender has permission to use private messaging
         if (!sender.hasPermission("nonchat.message")) {
             MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
@@ -357,7 +362,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                         @NotNull String label, @NotNull String[] args) {
-        if (!sender.hasPermission("nonchat.message")) {
+        if (!config.isPrivateChatEnabled() || !sender.hasPermission("nonchat.message")) {
             return Collections.emptyList();
         }
     
