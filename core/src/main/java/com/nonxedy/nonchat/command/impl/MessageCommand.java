@@ -2,10 +2,7 @@ package com.nonxedy.nonchat.command.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -19,65 +16,26 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.service.ChatService;
-import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.core.MessageManager;
 import com.nonxedy.nonchat.util.chat.MentionCompletionUtil;
-import com.nonxedy.nonchat.util.chat.filters.AdDetector;
-import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
-import com.nonxedy.nonchat.util.chat.filters.SpamDetector;
-import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
-import com.nonxedy.nonchat.util.chat.formatting.PrivateMessageUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.core.messages.MessageUtil;
 
-import net.kyori.adventure.text.Component;
-
 /**
- * Handles private messaging between players
- * Provides secure player-to-player communication
+ * Handles the /msg command. Delivery, filtering, ignore and world-scope checks
+ * are done by {@link MessageManager}.
  */
 public class MessageCommand implements CommandExecutor, TabCompleter {
-    private final Map<UUID, UUID> lastMessaged = new HashMap<>();
-
-    // Required dependencies
     private final Nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
-    private final SpyCommand spyCommand;
-    private final ChatService chatService;
-    private IgnoreCommand ignoreCommand;
-    private final AdDetector adDetector;
-    private final SpamDetector spamDetector;
-    private final WordBlocker wordBlocker;
+    private final MessageManager messageManager;
 
-    // Constructor to initialize all required dependencies
-    public MessageCommand(Nonchat plugin, PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
+    public MessageCommand(Nonchat plugin, PluginConfig config, PluginMessages messages, MessageManager messageManager) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
-        this.spyCommand = spyCommand;
-        this.chatService = null;
-        this.ignoreCommand = plugin.getIgnoreCommand();
-        this.adDetector = new AdDetector(config, config.getAntiAdSensitivity(), config.getAntiAdPunishCommand(), config.shouldNotifyStaffAboutAds(), config.getAntiAdNotifyMessage());
-        this.spamDetector = new SpamDetector(config, messages);
-        this.wordBlocker = new WordBlocker(config, messages);
-    }
-    
-    // Alternative constructor for service-based architecture
-    public MessageCommand(ChatService chatService, ConfigService configService) {
-        this.chatService = chatService;
-        this.plugin = null;
-        this.config = configService.getConfig();
-        this.messages = configService.getMessages();
-        this.spyCommand = null;
-        this.ignoreCommand = null;
-        this.adDetector = new AdDetector(config, config.getAntiAdSensitivity(), config.getAntiAdPunishCommand(), config.shouldNotifyStaffAboutAds(), config.getAntiAdNotifyMessage());
-        this.spamDetector = new SpamDetector(config, messages);
-        this.wordBlocker = new WordBlocker(config, messages);
-    }
-
-    public Map<UUID, UUID> getLastMessaged() {
-        return lastMessaged;
+        this.messageManager = messageManager;
     }
 
     /**
@@ -90,18 +48,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        // Log the command execution for debugging
-        if (plugin != null) {
-            plugin.logCommand(command.getName(), args);
-        }
-
-        // Verify if the command is a valid message command alias
-        if (!isMessageCommand(command.getName())) {
-            if (plugin != null) {
-                plugin.logError("Invalid command: " + command.getName());
-            }
-            return false;
-        }
+        plugin.logCommand(command.getName(), args);
 
         if (!config.isPrivateChatEnabled()) {
             MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("command-disabled")));
@@ -111,18 +58,13 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         // Check if sender has permission to use private messaging
         if (!sender.hasPermission("nonchat.message")) {
             MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("no-permission")));
-            if (plugin != null) {
-                plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
-            }
+            plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
             return true;
         }
 
         // Validate command arguments (need at least target player and message)
         if (args.length < 2) {
             MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("invalid-usage-message")));
-            if (plugin != null) {
-                plugin.logError("Player " + sender.getName() + " tried to use the message command with invalid arguments.");
-            }
             return true;
         }
 
@@ -130,225 +72,13 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
             MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-not-found")));
-            if (plugin != null) {
-                plugin.logError("Player " + sender.getName() + " tried to message a player that is not online.");
-            }
-            return true;
-        }
-
-        // Treat players outside the sender's private-message world scope as unavailable.
-        // This deliberately uses the same response as an offline/unknown player so the
-        // restriction does not leak players from other scopes
-        if (sender instanceof Player player && !config.canPrivateMessage(player, target)) {
-            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-not-found")));
-            if (plugin != null) {
-                plugin.logError("Player " + sender.getName() + " tried to message a player outside their world scope.");
-            }
-            return true;
-        }
-
-        // Check if target player has ignored the sender
-        if (isIgnored(sender, target)) {
-            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
-            if (plugin != null) {
-                plugin.logError("Player " + sender.getName() + " tried to message a player that has ignored them.");
-            }
-            return true;
-        }
-        
-        // Check if sender is ignoring the target
-        if (sender instanceof Player && isIgnoringTarget((Player)sender, target)) {
-            MessageUtil.send(sender, ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
-                    .replace("{player}", target.getName())));
-            if (plugin != null) {
-                plugin.logError("Player " + sender.getName() + " tried to message a player they are ignoring.");
-            }
             return true;
         }
 
         // Combine all remaining arguments into the message
         String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-        
-        // Always deliver through MessageManager when available so
-        // NonchatPrivateMessageEvent fires for /msg the same way as /reply
-        if (plugin != null && plugin.getMessageManager() != null) {
-            plugin.getMessageManager().sendPrivateMessage(sender, target, message, false);
-        } else if (chatService != null && sender instanceof Player player) {
-            chatService.handlePrivateMessage(player, target, message);
-        } else {
-            sendPrivateMessage(sender, target, message);
-        }
-        
+        messageManager.sendPrivateMessage(sender, target, message, false);
         return true;
-    }
-
-    /**
-     * Checks if command is a valid message command alias
-     * @param commandName Command name to check
-     * @return true if valid message command
-     */
-    private boolean isMessageCommand(String commandName) {
-        return commandName.equalsIgnoreCase("message") ||
-            commandName.equalsIgnoreCase("msg") ||
-            commandName.equalsIgnoreCase("tell") ||
-            commandName.equalsIgnoreCase("w") ||
-            commandName.equalsIgnoreCase("m") ||
-            commandName.equalsIgnoreCase("whisper");
-    }
-
-    /**
-     * Checks if target has ignored sender
-     * @param sender Message sender
-     * @param target Message recipient
-     * @return true if sender is ignored
-     */
-    private boolean isIgnored(CommandSender sender, Player target) {
-        if (!(sender instanceof Player)) {
-            return false;
-        }
-        
-        // Get the ignore command to check ignore status
-        IgnoreCommand ignoreCommand = getIgnoreCommand();
-        if (ignoreCommand != null) {
-            return ignoreCommand.isIgnoring(target, (Player)sender);
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Checks if sender is ignoring target
-     * @param sender Message sender
-     * @param target Message recipient
-     * @return true if target is ignored
-     */
-    private boolean isIgnoringTarget(Player sender, Player target) {
-        // Get the ignore command to check ignore status
-        IgnoreCommand ignoreCommand = getIgnoreCommand();
-        if (ignoreCommand != null) {
-            return ignoreCommand.isIgnoring(sender, target);
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Gets the ignore command instance
-     * @return IgnoreCommand instance or null if not found
-     */
-    private IgnoreCommand getIgnoreCommand() {
-        if (ignoreCommand != null) {
-            return ignoreCommand;
-        }
-        
-        if (plugin != null) {
-            return plugin.getIgnoreCommand();
-        }
-        return null;
-    }
-
-    /**
-     * Sends private message to sender and recipient with enhanced formatting and hover effects
-     * @param sender Message sender
-     * @param target Message recipient
-     * @param message Message content
-     */
-    private void sendPrivateMessage(CommandSender sender, Player target, String message) {
-        // If MessageManager is available and sender is a player, delegate to it
-        // (it already contains full filtering logic)
-        if (plugin != null && sender instanceof Player playerSender) {
-            try {
-                if (plugin.getMessageManager() != null) {
-                    plugin.getMessageManager().sendPrivateMessage(playerSender, target, message);
-                    return;
-                }
-            } catch (Exception ignored) {
-                // Fall through to legacy handling if delegation fails
-            }
-        }
-
-        // Legacy path: apply filters directly (used when MessageManager not available or console sender)
-        if (sender instanceof Player player) {
-            if (!applyFilters(player, message)) {
-                if (plugin != null) {
-                    plugin.logChatMessage("Filtered PM (legacy): Player=" + player.getName() + " -> " + target.getName() + " Message=\"" + message + "\" Reason=filter_blocked");
-                }
-                return;
-            }
-        }
-
-        // Check if sender has color permission and process message accordingly
-        String processedMessage;
-        if (sender instanceof Player player && !player.hasPermission("nonchat.color")) {
-            // Strip all color codes if player doesn't have permission
-            processedMessage = ColorUtil.stripFormatting(message);
-        } else {
-            processedMessage = message;
-        }
-        
-        // Create and send formatted message to sender using new utility
-        Component senderMessage = PrivateMessageUtil.createSenderMessage(config, 
-            sender instanceof Player player ? player : null, target, processedMessage);
-        
-        MessageUtil.send(sender, senderMessage);
-        if (plugin != null) {
-            plugin.logResponse("Message sent to " + sender.getName());
-        }
-
-        // Create and send formatted message to target using new utility
-        Component targetMessage = PrivateMessageUtil.createReceiverMessage(config, 
-            sender instanceof Player player ? player : null, target, processedMessage);
-        
-        MessageUtil.send(target, targetMessage);
-        if (plugin != null) {
-            plugin.logResponse("Message sent to " + target.getName());
-        }
-
-        // Notify spy players if spy system is enabled and sender is a player
-        if (spyCommand != null && sender instanceof Player) {
-            spyCommand.onPrivateMessage((Player) sender, target, Component.text(processedMessage));
-            if (plugin != null) {
-                plugin.logResponse("Message sent to spy players");
-            }
-        }
-
-        // Update both players' reply targets so /reply follows the active private conversation.
-        if (plugin != null && sender instanceof Player player) {
-            plugin.getMessageManager().updateReplyTargets(player, target);
-        }
-    }
-
-    private boolean applyFilters(Player player, String message) {
-        // Check blocked words
-        if (handleBlockedWords(player, message)) {
-            return false;
-        }
-
-        // Check caps filter
-        CapsFilter capsFilter = config.getCapsFilter();
-        if (capsFilter.shouldFilter(player, message)) {
-            return false;
-        }
-
-        // Check spam
-        if (config.isAntiSpamEnabled() && !player.hasPermission("nonchat.spam.bypass")) {
-            if (spamDetector.shouldFilter(player, message)) {
-                return false;
-            }
-        }
-
-        // Check advertisements
-        if (config.isAntiAdEnabled() && !player.hasPermission("nonchat.ad.bypass")) {
-            if (adDetector.shouldFilter(player, message)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean handleBlockedWords(Player player, String message) {
-        return wordBlocker.checkAndHandle(player, message);
     }
 
     /**
@@ -365,7 +95,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         if (!config.isPrivateChatEnabled() || !sender.hasPermission("nonchat.message")) {
             return Collections.emptyList();
         }
-    
+
         if (args.length == 1) {
             return Bukkit.getOnlinePlayers().stream()
                     .filter(player -> !(sender instanceof Player senderPlayer) || senderPlayer.canSee(player))
@@ -376,7 +106,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
                     .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }
-    
+
         if (args.length >= 2 && config.isMentionsEnabled()) {
             List<String> mentionSuggestions = MentionCompletionUtil.getMentionSuggestions(
                     sender,
@@ -396,15 +126,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
                         .collect(Collectors.toList());
             }
         }
-    
+
         return Collections.emptyList();
-    }
-    
-    /**
-     * Sets the ignore command instance.
-     * @param ignoreCommand The ignore command instance
-     */
-    public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
-        this.ignoreCommand = ignoreCommand;
     }
 }

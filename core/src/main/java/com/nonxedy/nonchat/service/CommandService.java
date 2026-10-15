@@ -53,8 +53,8 @@ public class CommandService {
         IgnoreCommand ignoreCommand = plugin.getIgnoreCommand();
         
         // Private messaging commands
-        MessageCommand messageCommand = new MessageCommand(plugin, configService.getConfig(), 
-                                                          configService.getMessages(), spyCommand);
+        MessageCommand messageCommand = new MessageCommand(plugin, configService.getConfig(),
+                                                          configService.getMessages(), plugin.getMessageManager());
         registerCommand("msg", messageCommand);
         registerCommand("tell", messageCommand);
         registerCommand("w", messageCommand);

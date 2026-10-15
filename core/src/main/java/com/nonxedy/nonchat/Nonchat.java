@@ -134,7 +134,7 @@ public class Nonchat extends JavaPlugin {
             }
 
             // Initialize service layer that depends on managers
-            this.chatService = new ChatService(chatManager, messageManager, broadcastManager, configService.getConfig());
+            this.chatService = new ChatService(chatManager, broadcastManager, configService.getConfig());
 
             // Initialize command service last as it depends on all other services
             this.commandService = new CommandService(this, configService);
