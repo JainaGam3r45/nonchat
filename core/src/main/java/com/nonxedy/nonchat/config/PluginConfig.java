@@ -55,8 +55,7 @@ public class PluginConfig {
     // Constructor initializes config file path and loads configuration
     public PluginConfig(Nonchat plugin) {
         this.plugin = plugin;
-        // Sets config file path to plugins/nonchat/config.yml
-        this.configFile = new File("plugins/nonchat", "config.yml");
+        this.configFile = new File(plugin.getDataFolder(), "config.yml");
         loadConfig();
     }
 
