@@ -45,6 +45,11 @@ public class MsgToggleCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         plugin.logCommand(command.getName(), args);
 
+        if (!plugin.getConfigService().getConfig().isPrivateChatEnabled()) {
+            MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("command-disabled")));
+            return true;
+        }
+
         if (args.length > 1) {
             MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("invalid-usage-msgtoggle")));
             return true;
@@ -120,7 +125,8 @@ public class MsgToggleCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if (args.length == 1 && sender.hasPermission("nonchat.msgtoggle.others")) {
+        if (args.length == 1 && plugin.getConfigService().getConfig().isPrivateChatEnabled()
+                && sender.hasPermission("nonchat.msgtoggle.others")) {
             String partialName = args[0].toLowerCase();
             return Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName)
