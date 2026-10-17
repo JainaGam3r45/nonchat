@@ -74,6 +74,9 @@ public class NonchatExpansion extends PlaceholderExpansion {
             case "caps_filter_enabled" -> plugin.getConfigService().getConfig().isCapsFilterEnabled() ?
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.caps-filter.enabled")) :
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.caps-filter.disabled"));
+            case "ignored" -> plugin.getIgnoreCommand().isIgnoringAnyone(player) ?
+                ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.ignored.true")) :
+                ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.ignored.false"));
             case "current_channel" -> {
                 Channel currentChannel = plugin.getChatManager().getPlayerChannel(player);
                 if (currentChannel != null) {
