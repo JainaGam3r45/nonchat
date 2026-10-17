@@ -40,6 +40,7 @@ me-command: "&#FFAFFB/me <message>&#ffffff - sent a message from your character"
 roll-command: "&#FFAFFB/roll <maximum number>&#ffffff - roll a dice"
 channel-command: "&#FFAFFB/channel help&#ffffff - show channel commands"
 reply-command: "&#FFAFFB/reply <message>&#ffffff - reply to the last player"
+msgtoggle-command: "&#FFAFFB/msgtoggle&#ffffff - turn private messages off/on"
 
 # Clear Chat.
 clear-chat: "&#FFAFFBChat clearing..."
@@ -54,6 +55,15 @@ invalid-usage-message: "&#ffffffUse: &#FFAFFB/m <player> <message>"
 # Reply.
 no-reply-target: "&#ff0000You have no target to reply."
 invalid-usage-reply: "&#ffffffUse: &#FFAFFB/reply <message>"
+
+# Msgtoggle.
+msgtoggle-enabled: "&#84FFB8Private messages enabled."
+msgtoggle-disabled: "&#ff0000Private messages disabled."
+msgtoggle-enabled-other: "&#84FFB8Private messages enabled for {player}."
+msgtoggle-disabled-other: "&#ff0000Private messages disabled for {player}."
+msgtoggle-sender-disabled: "&#ff0000You have private messages disabled. Use &#FFAFFB/msgtoggle&#ff0000 to enable them."
+msgtoggle-target-disabled: "&#ff0000{player} has private messages disabled."
+invalid-usage-msgtoggle: "&#ffffffUse: &#FFAFFB/msgtoggle [player]"
 
 # Ignore.
 ignored-player: "&#84FFB8You started ignored the player {player}."
@@ -167,6 +177,10 @@ placeholders:
   spy: # %nonchat_spy_enabled%
     enabled: "&#ffffffSpy Mode: &#84FFB8Enabled"
     disabled: "&#ffffffSpy Mode: &#ff0000Disabled"
+  # Private messages placeholders.
+  msg: # %nonchat_msg_enabled%
+    enabled: "&#ffffffPrivate Messages: &#84FFB8Enabled"
+    disabled: "&#ffffffPrivate Messages: &#ff0000Disabled"
   # Chat Bubbles placeholders.
   bubble: # %nonchat_bubble_enabled%
     enabled: "&#ffffffChat Bubbles: &#84FFB8Enabled"

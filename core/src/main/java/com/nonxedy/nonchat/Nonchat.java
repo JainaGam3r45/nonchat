@@ -12,6 +12,7 @@ import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.api.IPlatformAdapter;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
+import com.nonxedy.nonchat.command.impl.MsgToggleCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.core.BroadcastManager;
@@ -60,6 +61,7 @@ public class Nonchat extends JavaPlugin {
     private SpyCommand spyCommand;
     private Debugger debugger;
     private IgnoreCommand ignoreCommand;
+    private MsgToggleCommand msgToggleCommand;
     private DiscordSRVIntegration discordSRVIntegration;
     private ChatColorHook chatColorHook;
     private InteractivePlaceholderManager placeholderManager;
@@ -117,6 +119,7 @@ public class Nonchat extends JavaPlugin {
             // Now that config is loaded, initialize the rest of the services
             this.spyCommand = new SpyCommand(this, configService.getMessages(), configService.getConfig());
             this.ignoreCommand = new IgnoreCommand(this, configService.getMessages());
+            this.msgToggleCommand = new MsgToggleCommand(this, configService.getMessages());
 
             // Initialize core managers
             this.chatManager = new ChatManager(this, configService.getConfig(), configService.getMessages());
@@ -126,6 +129,7 @@ public class Nonchat extends JavaPlugin {
             // Set ignore command in managers
             this.chatManager.setIgnoreCommand(ignoreCommand);
             this.messageManager.setIgnoreCommand(ignoreCommand);
+            this.messageManager.setMsgToggleCommand(msgToggleCommand);
 
             // Initialize LinkDetector with translation support before creating commands
             LinkDetector.initialize(configService.getMessages());
@@ -628,6 +632,10 @@ public class Nonchat extends JavaPlugin {
 
     public IgnoreCommand getIgnoreCommand() {
         return ignoreCommand;
+    }
+
+    public MsgToggleCommand getMsgToggleCommand() {
+        return msgToggleCommand;
     }
 
     public ConfigService getConfigService() {

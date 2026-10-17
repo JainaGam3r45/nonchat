@@ -42,6 +42,7 @@ me-command: "&#FFAFFB/me <mensaje>&#ffffff - envía un mensaje desde tu personaj
 roll-command: "&#FFAFFB/roll <número máximo>&#ffffff - lanza un dado"
 channel-command: "&#FFAFFB/channel help&#ffffff - muestra comandos de canales"
 reply-command: "&#FFAFFB/reply <mensaje>&#ffffff - responde al último jugador"
+msgtoggle-command: "&#FFAFFB/msgtoggle&#ffffff - desactiva/activa los mensajes privados"
 
 # Limpiar Chat.
 clear-chat: "&#FFAFFBLimpiando el chat..."
@@ -56,6 +57,15 @@ invalid-usage-message: "&#ffffffUso: &#FFAFFB/m <jugador> <mensaje>"
 # Responder.
 no-reply-target: "&#ff0000No tienes a quién responder."
 invalid-usage-reply: "&#ffffffUso: &#FFAFFB/reply <mensaje>"
+
+# Msgtoggle.
+msgtoggle-enabled: "&#84FFB8Mensajes privados activados."
+msgtoggle-disabled: "&#ff0000Mensajes privados desactivados."
+msgtoggle-enabled-other: "&#84FFB8Mensajes privados activados para {player}."
+msgtoggle-disabled-other: "&#ff0000Mensajes privados desactivados para {player}."
+msgtoggle-sender-disabled: "&#ff0000Tienes los mensajes privados desactivados. Usa &#FFAFFB/msgtoggle&#ff0000 para activarlos."
+msgtoggle-target-disabled: "&#ff0000{player} tiene los mensajes privados desactivados."
+invalid-usage-msgtoggle: "&#ffffffUso: &#FFAFFB/msgtoggle [jugador]"
 
 # Ignorar.
 ignored-player: "&#84FFB8Ahora estás ignorando al jugador {player}."
@@ -169,6 +179,10 @@ placeholders:
   spy: # %nonchat_spy_enabled%
     enabled: "&#ffffffModo Espía: &#84FFB8Activado"
     disabled: "&#ffffffModo Espía: &#ff0000Desactivado"
+  # Mensajes privados.
+  msg: # %nonchat_msg_enabled%
+    enabled: "&#ffffffMensajes Privados: &#84FFB8Activados"
+    disabled: "&#ffffffMensajes Privados: &#ff0000Desactivados"
   # Variables de burbujas de chat.
   bubble: # %nonchat_bubble_enabled%
     enabled: "&#ffffffBurbujas de Chat: &#84FFB8Activadas"

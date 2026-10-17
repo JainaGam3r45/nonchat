@@ -38,6 +38,7 @@
 | `/broadcast` | Send server-wide announcements |
 | `/msg` | Send private messages |
 | `/reply` | Reply to the last private message |
+| `/msgtoggle` | Turn your private messages off/on |
 | `/clear` | Clear chat history |
 | `/ignore` | Ignore specific players |
 | `/spy` | Toggle private message spy mode |

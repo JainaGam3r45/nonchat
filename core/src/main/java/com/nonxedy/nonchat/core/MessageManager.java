@@ -12,6 +12,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.event.NonchatPrivateMessageEvent;
 import com.nonxedy.nonchat.api.event.NonchatPrivateMessageSentEvent;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
+import com.nonxedy.nonchat.command.impl.MsgToggleCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
@@ -33,6 +34,7 @@ public class MessageManager {
     private final SpyCommand spyCommand;
     private final Map<UUID, UUID> lastMessageSender = new ConcurrentHashMap<>();
     private volatile IgnoreCommand ignoreCommand;
+    private volatile MsgToggleCommand msgToggleCommand;
     private final AdDetector adDetector;
     private final SpamDetector spamDetector;
     private final WordBlocker wordBlocker;
@@ -107,11 +109,25 @@ public class MessageManager {
 
         Player playerSender = sender instanceof Player player ? player : null;
 
+        boolean bypassToggle = playerSender != null && playerSender.hasPermission("nonchat.msgtoggle.bypass");
+
         if (playerSender != null) {
+            // A player with private messages off cannot start conversations nobody can answer
+            if (!bypassToggle && msgToggleCommand != null && !msgToggleCommand.isEnabled(playerSender)) {
+                MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("msgtoggle-sender-disabled")));
+                return;
+            }
+
             // Re-check the world scope at delivery time. This also protects /reply
             // when either player has moved to a different world since the last PM
             if (!config.canPrivateMessage(playerSender, receiver)) {
                 MessageUtil.send(sender, ColorUtil.parseComponentCached(messages.getString("player-not-found")));
+                return;
+            }
+
+            if (!bypassToggle && msgToggleCommand != null && !msgToggleCommand.isEnabled(receiver)) {
+                MessageUtil.send(sender, ColorUtil.parseComponent(messages.getString("msgtoggle-target-disabled")
+                        .replace("{player}", receiver.getName())));
                 return;
             }
 
@@ -267,5 +283,14 @@ public class MessageManager {
      */
     public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
         this.ignoreCommand = ignoreCommand;
+    }
+
+    /**
+     * Sets the private message toggle command instance.
+     *
+     * @param msgToggleCommand The msgtoggle command instance
+     */
+    public void setMsgToggleCommand(MsgToggleCommand msgToggleCommand) {
+        this.msgToggleCommand = msgToggleCommand;
     }
 }

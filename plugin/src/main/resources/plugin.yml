@@ -23,6 +23,9 @@ permissions:
     children:
       - nonchat.message
       - nonchat.reply
+      - nonchat.msgtoggle
+      - nonchat.msgtoggle.others
+      - nonchat.msgtoggle.bypass
       - nonchat.broadcast
       - nonchat.server
       - nonchat.reload
@@ -53,6 +56,15 @@ permissions:
   nonchat.reply:
     description: Allows /reply command
     default: true
+  nonchat.msgtoggle:
+    description: Allows turning your own private messages off and on with /msgtoggle
+    default: true
+  nonchat.msgtoggle.others:
+    description: Allows /msgtoggle <player> for other players
+    default: op
+  nonchat.msgtoggle.bypass:
+    description: Send private messages to players who turned them off
+    default: op
   nonchat.broadcast:
     description: Allows /broadcast command
     default: op
@@ -138,6 +150,12 @@ commands:
     aliases: [r]
     usage: /reply <message>
     permission: nonchat.reply
+    permission-message: You do not have <permission> to use this command!
+  msgtoggle:
+    description: Turn private messages off or on.
+    aliases: [togglemsg, pmtoggle, togglepm]
+    usage: /msgtoggle [player]
+    permission: nonchat.msgtoggle
     permission-message: You do not have <permission> to use this command!
   broadcast:
     description: Send a message to all players.

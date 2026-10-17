@@ -16,6 +16,7 @@ import com.nonxedy.nonchat.command.impl.ClearCommand;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.MeCommand;
 import com.nonxedy.nonchat.command.impl.MessageCommand;
+import com.nonxedy.nonchat.command.impl.MsgToggleCommand;
 import com.nonxedy.nonchat.command.impl.NonchatCommand;
 import com.nonxedy.nonchat.command.impl.ReplyCommand;
 import com.nonxedy.nonchat.command.impl.RollCommand;
@@ -51,6 +52,7 @@ public class CommandService {
         // Get command instances from plugin
         SpyCommand spyCommand = plugin.getSpyCommand();
         IgnoreCommand ignoreCommand = plugin.getIgnoreCommand();
+        MsgToggleCommand msgToggleCommand = plugin.getMsgToggleCommand();
         
         // Private messaging commands
         MessageCommand messageCommand = new MessageCommand(plugin, configService.getConfig(),
@@ -64,6 +66,8 @@ public class CommandService {
         ReplyCommand replyCommand = new ReplyCommand(plugin, plugin.getMessageManager(), configService.getMessages());
         registerCommand("reply", replyCommand);
         registerCommand("r", replyCommand);
+
+        registerCommand("msgtoggle", msgToggleCommand);
     
         // Chat management commands
         registerCommand("broadcast", new BroadcastCommand(configService.getMessages(), plugin, configService.getConfig()));

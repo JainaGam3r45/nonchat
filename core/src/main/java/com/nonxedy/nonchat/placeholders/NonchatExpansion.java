@@ -65,6 +65,9 @@ public class NonchatExpansion extends PlaceholderExpansion {
             case "spy_enabled" -> plugin.getSpyCommand().isSpying(player) ? 
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.spy.enabled")) :
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.spy.disabled"));
+            case "msg_enabled" -> plugin.getMsgToggleCommand().isEnabled(player) ?
+                ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.msg.enabled")) :
+                ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.msg.disabled"));
             case "bubble_enabled" -> plugin.getConfigService().getConfig().isChatBubblesEnabled() ?
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.bubble.enabled")) :
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.bubble.disabled"));
