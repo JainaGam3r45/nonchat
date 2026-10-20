@@ -41,4 +41,10 @@ class LinkDetectorTest {
     void keepsVersionNumbersPlain() {
         assertFalse(hasClickEvent(LinkDetector.makeLinksClickable("i play on 1.21.11")));
     }
+
+    @Test
+    void keepsInvalidUrlsPlain() {
+        assertFalse(hasClickEvent(LinkDetector.makeLinksClickable("https://[lang]jugado.scoreboard[/lang]")));
+        assertFalse(hasClickEvent(LinkDetector.makeLinksClickable("[lang]jugado.scoreboard[/lang]")));
+    }
 }

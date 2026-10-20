@@ -1,5 +1,7 @@
 package com.nonxedy.nonchat.util.chat.filters;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -70,8 +72,9 @@ public class LinkDetector {
                 parts.add(ColorUtil.parseComponent(beforeUrl));
             }
 
-            if (isLinkCandidate(cleanUrl)) {
-                parts.add(createLinkComponent(cleanUrl));
+            Component link = isLinkCandidate(cleanUrl) ? createLinkComponent(cleanUrl) : null;
+            if (link != null) {
+                parts.add(link);
             } else {
                 parts.add(ColorUtil.parseComponent(cleanUrl));
             }
@@ -93,6 +96,13 @@ public class LinkDetector {
             clickableUrl = "https://" + url;
         } else if (!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
             clickableUrl = "https://" + url;
+        }
+
+        // Newer Adventure versions reject such URLs in ClickEvent.openUrl
+        try {
+            if (new URI(clickableUrl).getHost() == null) return null;
+        } catch (URISyntaxException e) {
+            return null;
         }
 
         Component hoverComponent;
