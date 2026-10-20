@@ -33,6 +33,8 @@ import com.nonxedy.nonchat.util.special.mention.MentionNotifier;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public class ChatManager {
 
@@ -604,10 +606,23 @@ public class ChatManager {
                 plugin.logError("Error processing format placeholders for console: " + e.getMessage());
             }
         }
-        consoleFormat = consoleFormat.replace("{message}", originalMessage);
+        Component consoleMessage;
+        if (sender.hasPermission("nonchat.color")) {
+            consoleMessage = ColorUtil.parseComponent(consoleFormat.replace("{message}", originalMessage));
+        } else {
+            // Raw chat text must not be parsed as formatting for players without color permission
+            consoleMessage = ColorUtil.parseComponent(consoleFormat.replace("{message}", "<nonchat_message>"),
+                    Placeholder.unparsed("nonchat_message", ColorUtil.stripFormatting(originalMessage)));
+        }
 
         // Send to console with processed format
-        MessageUtil.send(Bukkit.getConsoleSender(), ColorUtil.parseComponent(consoleFormat));
+        try {
+            MessageUtil.send(Bukkit.getConsoleSender(), consoleMessage);
+        } catch (IllegalStateException e) {
+            // ANSI console renderer rejects components nested deeper than 128 styles
+            MessageUtil.send(Bukkit.getConsoleSender(),
+                    Component.text(PlainTextComponentSerializer.plainText().serialize(consoleMessage)));
+        }
 
         // Count how many players received the message
         long recipientCount = Bukkit.getOnlinePlayers().stream()
