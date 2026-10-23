@@ -13,9 +13,17 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
+
+import com.nonxedy.nonchat.config.ConfigUpdater;
 
 // Manages language files and provides methods to load and get translations
 public class LanguageManager {
+
+    // Language files bundled with the plugin
+    private static final String[] BUNDLED_LANGUAGES = {"messages_en.yml", "messages_ru.yml", "messages_es.yml"};
+
+    private final Plugin plugin;
 
     // Directory containing all language files
     private final File langsFolder;
@@ -26,10 +34,11 @@ public class LanguageManager {
     
     /**
      * Initializes the language manager and sets up default languages
-     * @param dataFolder The plugin's data folder where language files will be stored
+     * @param plugin The plugin whose data folder stores the language files
      */
-    public LanguageManager(File dataFolder) {
-        this.langsFolder = new File(dataFolder, "langs");
+    public LanguageManager(Plugin plugin) {
+        this.plugin = plugin;
+        this.langsFolder = new File(plugin.getDataFolder(), "langs");
         this.loadedLanguages = new HashMap<>();
         setupLanguages();
     }
@@ -43,10 +52,14 @@ public class LanguageManager {
             langsFolder.mkdirs();
         }
         
-        // Create default language files if they don't exist
-        createLanguageFile("messages_en.yml");
-        createLanguageFile("messages_ru.yml");
-        createLanguageFile("messages_es.yml");
+        // Create default language files if they don't exist and add keys from newer plugin versions
+        for (String filename : BUNDLED_LANGUAGES) {
+            createLanguageFile(filename);
+            File langFile = new File(langsFolder, filename);
+            if (langFile.exists()) {
+                ConfigUpdater.updateFile(plugin, langFile, "langs/" + filename, null);
+            }
+        }
         
         // Load all language files from the directory
         for (File file : langsFolder.listFiles()) {

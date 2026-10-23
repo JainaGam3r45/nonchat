@@ -18,7 +18,7 @@ public class PluginMessages {
     // Constructor initializes the messages system
     public PluginMessages(Nonchat plugin) {
         this.plugin = plugin;
-        this.languageManager = new LanguageManager(plugin.getDataFolder());
+        this.languageManager = new LanguageManager(plugin);
         this.formatter = new MessageFormatter(this);
     }
 
