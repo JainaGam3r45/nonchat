@@ -43,6 +43,7 @@ roll-command: "&#FFAFFB/roll <número máximo>&#ffffff - lanza un dado"
 channel-command: "&#FFAFFB/channel help&#ffffff - muestra comandos de canales"
 reply-command: "&#FFAFFB/reply <mensaje>&#ffffff - responde al último jugador"
 msgtoggle-command: "&#FFAFFB/msgtoggle&#ffffff - desactiva/activa los mensajes privados"
+strikes-command: "&#FFAFFB/strikes <jugador>&#ffffff - muestra los strikes de moderación"
 
 # Limpiar Chat.
 clear-chat: "&#FFAFFBLimpiando el chat..."
@@ -199,3 +200,11 @@ placeholders:
   current-channel: # %nonchat_current_channel%
     format: "&#ffffffCanal actual: &#84FFB8{channel} (&#FFAFFB{id}&#84FFB8)"
     none: "&#ff0000No hay ningún canal activo"
+
+# Strikes.
+strikes-usage: "&#FFAFFB/strikes <jugador>&#ffffff - muestra los strikes, &#FFAFFB/strikes clear <jugador> [tipo]&#ffffff - borra los strikes"
+strikes-none: "&#84FFB8{player} no tiene strikes activos."
+strikes-header: "&#FFAFFBStrikes de {player} ({count}):"
+strikes-entry: "&#ffffff- &#FFAFFB{type}&#ffffff, hace {ago}, caduca en {remaining}"
+strikes-cleared: "&#84FFB8Se borraron {count} strike(s) de {player}."
+strikes-invalid-type: "&#ff0000Tipo de infracción desconocido. Disponibles: {types}"

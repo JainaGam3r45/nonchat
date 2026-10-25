@@ -21,6 +21,7 @@ import com.nonxedy.nonchat.command.impl.NonchatCommand;
 import com.nonxedy.nonchat.command.impl.ReplyCommand;
 import com.nonxedy.nonchat.command.impl.RollCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
+import com.nonxedy.nonchat.command.impl.StrikesCommand;
 
 /**
  * Service for registering and managing plugin commands.
@@ -80,6 +81,9 @@ public class CommandService {
         registerCommand("me", new MeCommand(plugin, configService.getConfig(), configService.getMessages()));
         registerCommand("roll", new RollCommand(plugin, configService.getConfig(), configService.getMessages()));
     
+        // Moderation commands
+        registerCommand("strikes", new StrikesCommand(plugin, configService.getMessages()));
+
         // Utility commands
         registerCommand("nonchat", new NonchatCommand(plugin, configService.getMessages()));
         

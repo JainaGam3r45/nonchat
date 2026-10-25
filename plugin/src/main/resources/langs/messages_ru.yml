@@ -41,6 +41,7 @@ roll-command: "&#FFAFFB/roll <максимальное число>&#ffffff - б�
 channel-command: "&#FFAFFB/channel help&#ffffff - показать команды канала"
 reply-command: "&#FFAFFB/reply <сообщение>&#ffffff - ответить на последнего игрока"
 msgtoggle-command: "&#FFAFFB/msgtoggle&#ffffff - выключить/включить личные сообщения"
+strikes-command: "&#FFAFFB/strikes <игрок>&#ffffff - показать страйки модерации"
 
 # Clear Chat.
 clear-chat: "&#FFAFFBОчистка чата..."
@@ -197,3 +198,11 @@ placeholders:
   current-channel: # %nonchat_current_channel%
     format: "&#ffffffТекущий канал: &#84FFB8{channel} (&#FFAFFB{id}&#84FFB8)"
     none: "&#ff0000Нет активного канала"
+
+# Strikes.
+strikes-usage: "&#FFAFFB/strikes <игрок>&#ffffff - показать страйки, &#FFAFFB/strikes clear <игрок> [тип]&#ffffff - сбросить страйки"
+strikes-none: "&#84FFB8У {player} нет активных страйков."
+strikes-header: "&#FFAFFBСтрайки {player} ({count}):"
+strikes-entry: "&#ffffff- &#FFAFFB{type}&#ffffff, выдан {ago} назад, истекает через {remaining}"
+strikes-cleared: "&#84FFB8Сброшено страйков: {count} (игрок {player})."
+strikes-invalid-type: "&#ff0000Неизвестный тип нарушения. Доступно: {types}"

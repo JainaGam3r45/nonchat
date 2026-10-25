@@ -50,6 +50,8 @@ permissions:
       - nonchat.ad.notify
       - nonchat.wordblocker.notify
       - nonchat.caps.notify
+      - nonchat.moderation.strikes
+      - nonchat.moderation.strikes.clear
   nonchat.message:
     description: Allows /message command
     default: true
@@ -76,6 +78,12 @@ permissions:
     default: true
   nonchat.clear:
     description: Allows /clear command
+    default: op
+  nonchat.moderation.strikes:
+    description: Allows /strikes <player> to see the moderation strikes of a player
+    default: op
+  nonchat.moderation.strikes.clear:
+    description: Allows /strikes clear <player> [type] to clear moderation strikes
     default: op
   nonchat.ignore:
     description: Allows /ignore command
@@ -167,6 +175,12 @@ commands:
     description: Main plugin command for nonchat.
     usage: /nonchat <reload|help>
     permission: nonchat.help
+    permission-message: You do not have <permission> to use this command!
+  strikes:
+    description: Show or clear the moderation strikes of a player.
+    aliases: [strike]
+    usage: /strikes <player> | /strikes clear <player> [type]
+    permission: nonchat.moderation.strikes
     permission-message: You do not have <permission> to use this command!
   clear:
     description: Clear chat.
