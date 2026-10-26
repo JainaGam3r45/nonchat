@@ -58,11 +58,7 @@ class SanctionActionRunner {
         }
         debug.accept("Warning sent to " + player.getName());
 
-        // Resolve placeholders on the template first, then insert the flagged message,
-        // so user input never passes through placeholder parsing
-        String resolved = resolvePlaceholders(player, warnMessage)
-                .replace("%message%", orEmpty(violation.message()));
-        MessageUtil.send(player, ColorUtil.parseComponentCached(resolved));
+        MessageUtil.send(player, render(resolvePlaceholders(player, warnMessage), "%message%", violation.message()));
     }
 
     private void notifyStaff(Player player, Violation violation, ViolationRule rule) {
@@ -71,10 +67,8 @@ class SanctionActionRunner {
             return;
         }
 
-        // Same rule as warn(): the flagged message is inserted last
-        String notification = resolvePlaceholders(player, template.replace("{player}", player.getName()))
-                .replace("{message}", orEmpty(violation.message()));
-        Component component = ColorUtil.parseComponentCached(notification);
+        Component component = render(resolvePlaceholders(player, template.replace("{player}", player.getName())),
+                "{message}", violation.message());
 
         String permission = rule.staffNotifyPermission();
         Bukkit.getOnlinePlayers().stream()
@@ -120,7 +114,20 @@ class SanctionActionRunner {
                 .replace("%player_uuid%", player.getUniqueId().toString());
     }
 
-    private String orEmpty(String message) {
+    /**
+     * Parses a trusted template and inserts the flagged message as literal text, so formatting
+     * and MiniMessage tags typed by the player (e.g. click events) are never parsed
+     * @param template Template with placeholders already resolved
+     * @param token Token replaced by the message
+     * @param message The flagged message
+     */
+    static Component render(String template, String token, String message) {
+        return ColorUtil.parseComponentCached(template)
+                .replaceText(builder -> builder.matchLiteral(token)
+                        .replacement(Component.text(orEmpty(message))));
+    }
+
+    private static String orEmpty(String message) {
         return message != null ? message : "[empty]";
     }
 }
