@@ -41,7 +41,6 @@ roll-command: "&#FFAFFB/roll <maximum number>&#ffffff - roll a dice"
 channel-command: "&#FFAFFB/channel help&#ffffff - show channel commands"
 reply-command: "&#FFAFFB/reply <message>&#ffffff - reply to the last player"
 msgtoggle-command: "&#FFAFFB/msgtoggle&#ffffff - turn private messages off/on"
-strikes-command: "&#FFAFFB/strikes <player>&#ffffff - show moderation strikes"
 
 # Clear Chat.
 clear-chat: "&#FFAFFBChat clearing..."
@@ -198,11 +197,3 @@ placeholders:
   current-channel: # %nonchat_current_channel%
     format: "&#ffffffCurrent Channel: &#84FFB8{channel} (&#FFAFFB{id}&#84FFB8)"
     none: "&#ff0000No active channel"
-
-# Strikes.
-strikes-usage: "&#FFAFFB/strikes <player>&#ffffff - show strikes, &#FFAFFB/strikes clear <player> [type]&#ffffff - clear strikes"
-strikes-none: "&#84FFB8{player} has no active strikes."
-strikes-header: "&#FFAFFBStrikes of {player} ({count}):"
-strikes-entry: "&#ffffff- &#FFAFFB{type}&#ffffff, issued {ago} ago, expires in {remaining}"
-strikes-cleared: "&#84FFB8Cleared {count} strike(s) of {player}."
-strikes-invalid-type: "&#ff0000Unknown violation type. Available: {types}"

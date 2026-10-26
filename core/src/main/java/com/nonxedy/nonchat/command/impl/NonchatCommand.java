@@ -186,10 +186,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             .append(ColorUtil.parseComponentCached(messages.getString("reply-command")))
             .append(Component.newline())
             // Add msgtoggle command description
-            .append(ColorUtil.parseComponentCached(messages.getString("msgtoggle-command")))
-            .append(Component.newline())
-            // Add strikes command description
-            .append(ColorUtil.parseComponentCached(messages.getString("strikes-command")));
+            .append(ColorUtil.parseComponentCached(messages.getString("msgtoggle-command")));
     }
 
     /**
