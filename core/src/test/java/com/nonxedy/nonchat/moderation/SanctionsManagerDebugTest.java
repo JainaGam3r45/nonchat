@@ -35,7 +35,7 @@ class SanctionsManagerDebugTest {
                 return Optional.of(new Violation(ViolationType.CAPS, id, message));
             }
         };
-        ViolationRule rule = new ViolationRule(ViolationType.CAPS, null, null, null, false,
+        ViolationRule rule = new ViolationRule(ViolationType.CAPS, null, null, null, false, true,
                 List.of(new SanctionTier(strikesRequired, Duration.ofMinutes(5), List.of("block"))));
         return new SanctionsManager(List.of(detector), type -> rule, lines::add, null);
     }

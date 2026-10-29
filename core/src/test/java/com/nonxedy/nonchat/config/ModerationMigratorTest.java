@@ -40,13 +40,15 @@ class ModerationMigratorTest {
         assertEquals(70, out.getInt("caps.max-caps-percentage"));
         assertEquals(0.7, out.getDouble("advertising.sensitivity"));
         assertEquals(1, out.getMapList("advertising.tiers").get(0).get("strikes"));
-        assertEquals(java.util.List.of("block", "notify-staff", "ban %player_name% advertising"),
+        assertEquals(java.util.List.of("notify-staff", "ban %player_name% advertising"),
                 out.getMapList("advertising.tiers").get(0).get("actions"));
         assertTrue(out.getBoolean("advertising.update-tld-list"));
         assertEquals(false, out.getBoolean("banned-words.whole-words"));
-        assertEquals(java.util.List.of("block", "notify-staff", "tell %player_name% Slow down!"),
+        assertEquals(java.util.List.of("notify-staff", "tell %player_name% Slow down!"),
                 out.getMapList("spam.flood.tiers").get(0).get("actions"));
         assertEquals(5, out.getInt("spam.flood.max-messages"));
+        assertTrue(out.getBoolean("advertising.block"));
+        assertTrue(out.getBoolean("spam.flood.block"));
     }
 
     @Test
@@ -56,6 +58,22 @@ class ModerationMigratorTest {
         assertEquals(java.util.List.of("notify-staff", "ban %player_name% advertising"),
                 out.getMapList("advertising.tiers").get(0).get("actions"));
         assertEquals(true, out.getBoolean("spam.flood.console-notify"));
+        // 1.6.5 had no action lists and always blocked
+        assertTrue(out.getBoolean("advertising.block"));
+        assertTrue(out.getBoolean("banned-words.block"));
+    }
+
+    @Test
+    void ruleWithoutBlockActionOnlyReports() {
+        YamlConfiguration old = new YamlConfiguration();
+        old.set("caps-filter.actions", java.util.List.of("notify-staff"));
+        old.set("anti-spam.flood.actions", java.util.List.of("BLOCK", "notify-staff"));
+
+        YamlConfiguration out = ModerationMigrator.convert(old, null);
+
+        assertFalse(out.getBoolean("caps.block"));
+        assertTrue(out.getBoolean("spam.flood.block"));
+        assertEquals(java.util.List.of("notify-staff"), out.getMapList("spam.flood.tiers").get(0).get("actions"));
     }
 
     @Test
@@ -82,7 +100,7 @@ class ModerationMigratorTest {
         assertTrue(written.startsWith(template().lines().findFirst().get()), "header comes from the bundled file");
         assertTrue(written.contains("# Warning sent to the player."));
         YamlConfiguration migrated = YamlConfiguration.loadConfiguration(target);
-        assertEquals(java.util.List.of("block", "notify-staff", "ban %player_name% advertising"),
+        assertEquals(java.util.List.of("notify-staff", "ban %player_name% advertising"),
                 migrated.getMapList("advertising.tiers").get(0).get("actions"));
         assertEquals(5, migrated.getInt("spam.flood.max-messages"));
     }

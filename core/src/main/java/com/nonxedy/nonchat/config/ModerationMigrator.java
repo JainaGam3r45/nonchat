@@ -20,8 +20,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 /**
  * Moves the moderation settings of the old config.yml (banned-words, caps-filter, anti-ad, anti-spam)
- * into moderation.yml. Every old rule becomes a single sanction tier that fires at the first strike,
- * so the behavior stays the same. The old sections are then removed from config.yml, after a backup.
+ * into moderation.yml. Every old rule becomes a single sanction tier that fires at the first strike
+ * and keeps whether it blocked the message ('block'), so the behavior stays the same. The old sections are then removed from config.yml, after a backup.
  */
 final class ModerationMigrator {
 
@@ -84,7 +84,7 @@ final class ModerationMigrator {
         converted.options().setHeader(List.of(
                 "Chat moderation settings (moved here from the old config.yml sections).",
                 "Each violation kind has sanction 'tiers': once a player has 'strikes' violations within 'expire',",
-                "the tier's actions run. Actions: 'block' (implied), 'warn' (implied), 'notify-staff' or any console",
+                "the tier's actions run. 'block: false' only reports a violation. Actions: 'notify-staff' or any console",
                 "command (%player_name% is replaced). Durations: number + s/m/h/d."));
         return converted.saveToString();
     }
@@ -94,6 +94,7 @@ final class ModerationMigrator {
 
         ConfigurationSection words = old.getConfigurationSection("banned-words");
         out.set("banned-words.enabled", old.getBoolean("banned-words.enabled", true));
+        out.set("banned-words.block", blocks(old, "banned-words"));
         out.set("banned-words.words", old.isList("banned-words") ? old.getStringList("banned-words")
                 : old.getStringList("banned-words.words"));
         out.set("banned-words.whole-words", old.getBoolean("banned-words.whole-words", false));
@@ -108,6 +109,7 @@ final class ModerationMigrator {
         out.set("banned-words.tiers", tiers(old.getStringList("banned-words.actions")));
 
         out.set("caps.enabled", old.getBoolean("caps-filter.enabled", true));
+        out.set("caps.block", blocks(old, "caps-filter"));
         out.set("caps.max-caps-percentage", old.getInt("caps-filter.max-caps-percentage", 70));
         out.set("caps.min-length", old.getInt("caps-filter.min-length", 4));
         out.set("caps.message", text(old, "caps-filter.message", messages, "caps-filter", ""));
@@ -132,6 +134,7 @@ final class ModerationMigrator {
             }
         }
         out.set("advertising.enabled", old.getBoolean("anti-ad.enabled", true));
+        out.set("advertising.block", blocks(old, "anti-ad"));
         out.set("advertising.sensitivity", old.getDouble("anti-ad.sensitivity", 0.7));
         out.set("advertising.whitelisted-urls", old.getStringList("anti-ad.whitelisted-urls"));
         out.set("advertising.update-tld-list", old.getBoolean("anti-ad.update-tld-list", true));
@@ -164,6 +167,7 @@ final class ModerationMigrator {
     private static void spamKind(YamlConfiguration out, FileConfiguration old, PluginMessages messages,
                                  String kind, String defaultWarning) {
         String path = "anti-spam." + kind;
+        out.set("spam." + kind + ".block", blocks(old, path));
         out.set("spam." + kind + ".message", old.getString(path + ".message", defaultWarning));
         out.set("spam." + kind + ".notify-message", text(old, path + ".notify-message", messages,
                 "spam-detected-" + kind, ""));
@@ -186,11 +190,25 @@ final class ModerationMigrator {
         return translated != null ? translated : fallback;
     }
 
+    /**
+     * Whether an old rule blocked the message: with an action list (1.6.6) only when it contains 'block',
+     * without one (1.6.5) always
+     */
+    private static boolean blocks(FileConfiguration old, String path) {
+        return !old.isList(path + ".actions")
+                || old.getStringList(path + ".actions").stream().anyMatch(ModerationMigrator::isBlock);
+    }
+
+    private static boolean isBlock(String action) {
+        return action.trim().equalsIgnoreCase("block");
+    }
+
+    // 'block' is not an action any more: it became the rule's 'block' setting
     private static List<Map<String, Object>> tiers(List<String> actions) {
         Map<String, Object> tier = new LinkedHashMap<>();
         tier.put("strikes", 1);
         tier.put("expire", LEGACY_STRIKE_EXPIRE);
-        tier.put("actions", new ArrayList<>(actions));
+        tier.put("actions", new ArrayList<>(actions.stream().filter(action -> !isBlock(action)).toList()));
         return List.of(tier);
     }
 

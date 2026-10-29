@@ -30,12 +30,12 @@ class SanctionActionRunner {
      * @param player Player who committed the violation
      * @param violation The detected violation
      * @param rule Rule of the violation
-     * @param actions 'notify-staff' or console commands; 'block' and 'warn' are implied and skipped
+     * @param actions 'notify-staff' or console commands; 'block' (set per rule) and 'warn' (always sent) are skipped
      */
     void run(Player player, Violation violation, ViolationRule rule, List<String> actions) {
         for (String action : actions) {
             if (action.equalsIgnoreCase("block") || action.equalsIgnoreCase("warn")) {
-                // Blocking and the warning message are implied by the SanctionsManager
+                // Blocking is the rule's 'block' setting and the warning is always sent by the SanctionsManager
                 continue;
             }
             if (action.equalsIgnoreCase("notify-staff")) {

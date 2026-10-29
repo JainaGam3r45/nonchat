@@ -115,8 +115,8 @@ public class SanctionsManager {
             }
 
             Optional<Violation> violation = detector.inspect(player, message);
-            if (violation.isPresent()) {
-                sanction(player, violation.get());
+            // A rule with 'block: false' only reports, so the remaining detectors still check the message
+            if (violation.isPresent() && sanction(player, violation.get())) {
                 return true;
             }
         }
@@ -199,13 +199,17 @@ public class SanctionsManager {
         return copy;
     }
 
-    private void sanction(Player player, Violation violation) {
+    /**
+     * Registers the violation and runs its sanctions
+     * @return true if the message must be blocked
+     */
+    private boolean sanction(Player player, Violation violation) {
         debug.accept(player.getName() + " violated " + violation.type() + ": \"" + violation.message() + "\"");
 
         ViolationRule rule = ruleProvider.apply(violation.type());
         if (rule == null) {
             debug.accept("No rule for " + violation.type() + ", nothing applied");
-            return;
+            return true;
         }
 
         SanctionTier tier = registerStrike(violation, rule);
@@ -219,6 +223,10 @@ public class SanctionsManager {
                     + " (valid strikes: " + validStrikes(violation) + ", tiers: " + rule.tiers().size() + ")");
         }
         actionRunner.warn(player, violation, rule);
+        if (!rule.block()) {
+            debug.accept("Message of " + player.getName() + " allowed: " + violation.type() + " has block: false");
+        }
+        return rule.block();
     }
 
     /**

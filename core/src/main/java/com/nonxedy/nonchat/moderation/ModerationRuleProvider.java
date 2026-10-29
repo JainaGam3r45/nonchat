@@ -77,14 +77,15 @@ public class ModerationRuleProvider implements Function<ViolationType, Violation
 
         if (own == null) {
             // No section of its own (e.g. a spam kind missing from the file): only the shared tiers apply
-            return new ViolationRule(type, null, null, permission, consoleNotify, tiers);
+            return new ViolationRule(type, null, null, permission, consoleNotify, true, tiers);
         }
 
         String warn = own.getString("message");
         if (type == ViolationType.CAPS && warn != null) {
             warn = warn.replace("{percentage}", String.valueOf(config.getMaxCapsPercentage()));
         }
-        return new ViolationRule(type, warn, own.getString("notify-message"), permission, consoleNotify, tiers);
+        return new ViolationRule(type, warn, own.getString("notify-message"), permission, consoleNotify,
+                own.getBoolean("block", true), tiers);
     }
 
     private ConfigurationSection section(String key) {

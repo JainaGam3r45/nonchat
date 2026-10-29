@@ -1,14 +1,14 @@
 # ==================================================
 # CHAT MODERATION
-# Every violation blocks the message and warns the player. On top of that, each kind of violation has
-# sanction tiers: when a player collects 'strikes' violations of that kind within 'expire', the tier's
-# 'actions' run. Only the heaviest tier the player qualifies for runs.
+# Every violation warns the player and blocks the message, unless the rule has 'block: false'.
+# On top of that, each kind of violation has sanction tiers: when a player collects 'strikes'
+# violations of that kind within 'expire', the tier's 'actions' run. Only the heaviest tier the player qualifies for runs.
 #
 # Tier format:
 #   - strikes: 3          # violations needed
 #     expire: 1h          # how long a violation counts (number + s/m/h/d)
 #     actions: [...]      # 'notify-staff', or any console command (%player_name% is replaced)
-#                         # 'block' and 'warn' are implied and can be omitted
+#                         # 'warn' is implied and can be omitted
 # Example: warn at 1 strike, kick at 3, ban at 5:
 #   tiers:
 #     - { strikes: 1, expire: 10m, actions: [warn] }
@@ -22,6 +22,8 @@
 # ==================================================
 banned-words:
   enabled: true
+  # false: the violation is only reported (warning, strike, tiers) and the message is sent.
+  block: true
   # Simple text matching, case-insensitive.
   words:
     - "spam"
@@ -60,6 +62,8 @@ banned-words:
 # ==================================================
 caps:
   enabled: true
+  # false: the violation is only reported (warning, strike, tiers) and the message is sent.
+  block: true
   # Maximum percentage of capital letters allowed in a message.
   max-caps-percentage: 70
   # Minimum message length to check.
@@ -81,6 +85,8 @@ caps:
 # ==================================================
 advertising:
   enabled: true
+  # false: the violation is only reported (warning, strike, tiers) and the message is sent.
+  block: true
   # Detection sensitivity (0.0-1.0). Higher values may cause false positives.
   # 0.0-0.24: explicit URLs only; 0.25+: bare domains/IPs; 0.5+: common ad phrases.
   sensitivity: 0.7
@@ -122,6 +128,8 @@ spam:
   # The exact same message sent several times.
   repetitive:
     enabled: true
+    # false: the violation is only reported (warning, strike, tiers) and the message is sent.
+    block: true
     # Maximum number of identical messages allowed within the time window.
     threshold: 3
     # Time window in seconds.
@@ -138,6 +146,8 @@ spam:
   # Variations of the same content.
   similar:
     enabled: true
+    # false: the violation is only reported (warning, strike, tiers) and the message is sent.
+    block: true
     # Similarity threshold (0.0-1.0). Recommended: 0.80-0.90 strict, 0.70-0.80 moderate.
     threshold: 0.85
     time-window: 30
@@ -153,6 +163,8 @@ spam:
   # Too many messages in a short time.
   flood:
     enabled: true
+    # false: the violation is only reported (warning, strike, tiers) and the message is sent.
+    block: true
     max-messages: 5
     time-window: 5
     message: "&cYou are sending messages too quickly! Please slow down."
