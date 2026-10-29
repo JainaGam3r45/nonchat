@@ -112,7 +112,7 @@ final class ModerationMigrator {
         out.set("caps.min-length", old.getInt("caps-filter.min-length", 4));
         out.set("caps.message", text(old, "caps-filter.message", messages, "caps-filter", ""));
         out.set("caps.notify-message", old.getString("caps-filter.notify-message",
-                "&c{player} used excessive caps: {message}"));
+                "&c%player_name% used excessive caps: {message}"));
         out.set("caps.console-notify", old.getBoolean("caps-filter.console-notify", false));
         out.set("caps.tiers", tiers(old.contains("caps-filter.actions")
                 ? old.getStringList("caps-filter.actions") : List.of()));

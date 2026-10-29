@@ -43,9 +43,9 @@ banned-words:
     - '.*\d{4,}.*'
   # Warning sent to the player. %message% is the blocked message. "" sends no warning.
   message: "&#ff0000You are not allowed to use this word!"
-  # Text of the 'notify-staff' action ({player} and {message} are replaced).
+  # Text of the 'notify-staff' action ({message} is replaced).
   # Staff need 'nonchat.wordblocker.notify' (OPs always receive it).
-  notify-message: "&#FFAFFB[nonchat] &f{player} sent banned words: &#ff0000{message}"
+  notify-message: "&#FFAFFB[nonchat] &f%player_name% sent banned words: &#ff0000{message}"
   # Also log 'notify-staff' to the console.
   console-notify: true
   tiers:
@@ -66,9 +66,9 @@ caps:
   min-length: 4
   # Warning sent to the player. {percentage} is the maximum allowed.
   message: "&#ff0000Too many capital letters! Maximum allowed: {percentage}%"
-  # Text of the 'notify-staff' action ({player} and {message} are replaced).
+  # Text of the 'notify-staff' action ({message} is replaced).
   # Staff need 'nonchat.caps.notify' (OPs always receive it).
-  notify-message: "&c{player} used excessive caps: {message}"
+  notify-message: "&c%player_name% used excessive caps: {message}"
   console-notify: false
   tiers:
     - strikes: 1
@@ -127,7 +127,7 @@ spam:
     # Time window in seconds.
     time-window: 10
     message: "&cPlease do not send the same message repeatedly!"
-    notify-message: "&#FFAFFB[nonchat] &f{player} detected repetitive spam: &#ff0000{message}"
+    notify-message: "&#FFAFFB[nonchat] &f%player_name% detected repetitive spam: &#ff0000{message}"
     console-notify: true
     tiers:
       - strikes: 1
@@ -142,7 +142,7 @@ spam:
     threshold: 0.85
     time-window: 30
     message: "&cPlease do not send similar messages repeatedly!"
-    notify-message: "&#FFAFFB[nonchat] &f{player} detected similar spam: &#ff0000{message}"
+    notify-message: "&#FFAFFB[nonchat] &f%player_name% detected similar spam: &#ff0000{message}"
     console-notify: true
     tiers:
       - strikes: 1
@@ -156,7 +156,7 @@ spam:
     max-messages: 5
     time-window: 5
     message: "&cYou are sending messages too quickly! Please slow down."
-    notify-message: "&#FFAFFB[nonchat] &f{player} detected flood spam: &#ff0000{message}"
+    notify-message: "&#FFAFFB[nonchat] &f%player_name% detected flood spam: &#ff0000{message}"
     console-notify: true
     tiers:
       - strikes: 1

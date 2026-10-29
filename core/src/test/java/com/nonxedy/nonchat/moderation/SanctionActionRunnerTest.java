@@ -39,6 +39,15 @@ class SanctionActionRunnerTest {
         assertEquals("Blocked: [empty]", PlainTextComponentSerializer.plainText().serialize(component));
     }
 
+    @Test
+    void leadingSlashIsStrippedFromCommands() {
+        assertEquals("kick Alice", SanctionActionRunner.toConsoleCommand("/kick Alice"));
+        assertEquals("kick Alice", SanctionActionRunner.toConsoleCommand("  / kick Alice "));
+        assertEquals("ban Alice", SanctionActionRunner.toConsoleCommand("ban Alice"));
+        assertEquals("", SanctionActionRunner.toConsoleCommand("  "));
+        assertEquals("", SanctionActionRunner.toConsoleCommand(null));
+    }
+
     private static List<Object> clickEvents(Component component) {
         List<Object> events = new ArrayList<>();
         if (component.clickEvent() != null) {

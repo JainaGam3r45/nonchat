@@ -67,8 +67,7 @@ class SanctionActionRunner {
             return;
         }
 
-        Component component = render(resolvePlaceholders(player, template.replace("{player}", player.getName())),
-                "{message}", violation.message());
+        Component component = render(resolvePlaceholders(player, template), "{message}", violation.message());
 
         String permission = rule.staffNotifyPermission();
         Bukkit.getOnlinePlayers().stream()
@@ -81,11 +80,11 @@ class SanctionActionRunner {
     }
 
     private void executeCommand(Player player, String command) {
-        if (command == null || command.isEmpty()) {
+        String resolvedCommand = toConsoleCommand(resolvePlaceholders(player, command));
+        if (resolvedCommand.isEmpty()) {
             return;
         }
 
-        String resolvedCommand = resolvePlaceholders(player, command);
         debug.accept("Action command: " + resolvedCommand);
         try {
             // Run command sync on main thread
@@ -95,6 +94,18 @@ class SanctionActionRunner {
         } catch (IllegalArgumentException e) {
             Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cFailed to execute sanction command: {0}", e.getMessage());
         }
+    }
+
+    /**
+     * Strips the leading slash that configs often include: dispatchCommand expects the bare command
+     * @return The command to dispatch, or an empty string if there is nothing to run
+     */
+    static String toConsoleCommand(String command) {
+        if (command == null) {
+            return "";
+        }
+        String trimmed = command.trim();
+        return trimmed.startsWith("/") ? trimmed.substring(1).trim() : trimmed;
     }
 
     private String resolvePlaceholders(Player player, String text) {
