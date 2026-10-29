@@ -24,7 +24,7 @@ import com.nonxedy.nonchat.config.ModerationConfig;
  *       expire: 1h       # number + s/m/h/d
  *       actions: ["kick %player_name%"]
  * </pre>
- * Spam has a section per kind (repetitive, similar, flood); 'spam.tiers' is used by the kinds without their own.
+ * Spam has a section per kind (repetitive, similar, flood).
  * Rules are built on every violation, so config reloads are picked up immediately.
  */
 public class ModerationRuleProvider implements Function<ViolationType, ViolationRule> {
@@ -40,13 +40,13 @@ public class ModerationRuleProvider implements Function<ViolationType, Violation
     @Override
     public ViolationRule apply(ViolationType type) {
         return switch (type) {
-            case BANNED_WORD -> rule(type, section("banned-words"), section("banned-words"),
+            case BANNED_WORD -> rule(type, section("banned-words"),
                     "nonchat.wordblocker.notify", consoleNotify("banned-words", true));
-            case CAPS -> rule(type, section("caps"), null, "nonchat.caps.notify", consoleNotify("caps", false));
+            case CAPS -> rule(type, section("caps"), "nonchat.caps.notify", consoleNotify("caps", false));
             case SPAM_REPETITIVE -> spamRule(type, "repetitive");
             case SPAM_SIMILAR -> spamRule(type, "similar");
             case SPAM_FLOOD -> spamRule(type, "flood");
-            case ADVERTISING -> rule(type, section("advertising"), section("advertising"),
+            case ADVERTISING -> rule(type, section("advertising"),
                     "nonchat.ad.notify", consoleNotify("advertising", true));
         };
     }
@@ -56,7 +56,7 @@ public class ModerationRuleProvider implements Function<ViolationType, Violation
         ConfigurationSection kindSection = spam != null ? spam.getConfigurationSection(kind) : null;
         boolean fallback = spam == null || spam.getBoolean("console-notify", true);
         boolean consoleNotify = kindSection != null ? kindSection.getBoolean("console-notify", fallback) : fallback;
-        return rule(type, kindSection, spam, "nonchat.spam.notify", consoleNotify);
+        return rule(type, kindSection, "nonchat.spam.notify", consoleNotify);
     }
 
     private boolean consoleNotify(String key, boolean fallback) {
@@ -66,17 +66,15 @@ public class ModerationRuleProvider implements Function<ViolationType, Violation
 
     /**
      * @param own Section with the message, notify-message and tiers of this violation; may be null
-     * @param shared Section with 'tiers' (and console-notify) used when 'own' has no tiers; may be 'own' itself
      */
-    private ViolationRule rule(ViolationType type, ConfigurationSection own, ConfigurationSection shared,
+    private ViolationRule rule(ViolationType type, ConfigurationSection own,
                                String permission, boolean consoleNotify) {
-        ConfigurationSection tierSource = own != null && own.isList("tiers") ? own : shared;
-        List<SanctionTier> tiers = tierSource != null && tierSource.isList("tiers")
-                ? parseTiers(type, tierSource.getMapList("tiers"))
+        List<SanctionTier> tiers = own != null && own.isList("tiers")
+                ? parseTiers(type, own.getMapList("tiers"))
                 : List.of();
 
         if (own == null) {
-            // No section of its own (e.g. a spam kind missing from the file): only the shared tiers apply
+            // No section (e.g. a spam kind missing from the file): no messages and no tiers
             return new ViolationRule(type, null, null, permission, consoleNotify, true, tiers);
         }
 

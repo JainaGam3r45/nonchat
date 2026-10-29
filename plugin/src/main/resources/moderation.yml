@@ -119,7 +119,7 @@ advertising:
 # ==================================================
 # SPAM
 # Detects repetitive messages, similar messages and message flooding.
-# Each kind has its own 'tiers'; a kind without them uses 'spam.tiers' if present.
+# Each kind has its own 'tiers'.
 # ==================================================
 spam:
   enabled: true
